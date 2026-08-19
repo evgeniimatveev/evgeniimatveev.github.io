@@ -1,0 +1,505 @@
+<title>evgeniimatveev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:            #0B0D12;
+    --bg-panel:      #12151D;
+    --bg-panel-2:    #181D28;
+    --border:        #262B38;
+    --border-soft:   #1C202B;
+    --text:          #DBE1EC;
+    --text-dim:      #8892A4;
+    --text-faint:    #545C6E;
+    --accent:        #F0A868;
+    --accent-strong: #FFC98C;
+    --accent-soft:   rgba(240,168,104,0.12);
+    --ok:            #6FCF8E;
+    --ok-soft:       rgba(111,207,142,0.12);
+    --warn:          #E8C34D;
+    --critical:      #E2686B;
+    --radius:        3px;
+    --mono-ui:       'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --mono-body:     'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ color-scheme: dark; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--mono-body);
+    font-size:15px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--accent-strong); }
+
+  a{ color:var(--accent); text-decoration:none; border-bottom:1px solid transparent; }
+  a:hover, a:focus-visible{ border-bottom-color:var(--accent); }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  h1,h2,h3{ font-family:var(--mono-ui); text-wrap:balance; margin:0; }
+
+  .wrap{ max-width:920px; margin:0 auto; padding:0 20px; }
+
+  /* ---------- terminal chrome ---------- */
+  .term-titlebar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(11,13,18,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .term-titlebar-inner{
+    max-width:920px; margin:0 auto; padding:10px 20px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .dots{ display:flex; gap:6px; flex-shrink:0; }
+  .dots span{ width:9px; height:9px; border-radius:50%; display:block; }
+  .dots span:nth-child(1){ background:#E2686B; opacity:.55; }
+  .dots span:nth-child(2){ background:#E8C34D; opacity:.55; }
+  .dots span:nth-child(3){ background:#6FCF8E; opacity:.55; }
+  .term-path{
+    font-family:var(--mono-ui); font-size:12.5px; color:var(--text-dim);
+    flex:1; text-align:center; letter-spacing:.02em;
+  }
+  .term-path b{ color:var(--text); font-weight:500; }
+  .term-clock{
+    font-family:var(--mono-ui); font-size:12px; color:var(--text-faint);
+    font-variant-numeric:tabular-nums; min-width:64px; text-align:right; flex-shrink:0;
+  }
+
+  /* ---------- boot ---------- */
+  .boot{
+    max-width:920px; margin:0 auto; padding:28px 20px 0;
+    font-family:var(--mono-ui); font-size:12.5px; color:var(--text-faint);
+  }
+  .boot-line{ opacity:0; animation:reveal .01s linear forwards; }
+  .boot-line .ok{ color:var(--ok); }
+  @keyframes reveal{ to{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){
+    .boot-line{ opacity:1; animation:none; }
+  }
+
+  /* ---------- section / command blocks ---------- */
+  section{ padding:56px 0 8px; }
+  section:first-of-type{ padding-top:36px; }
+  .prompt{
+    font-family:var(--mono-ui); font-size:13px; color:var(--text-dim);
+    display:flex; align-items:baseline; gap:8px; margin-bottom:18px;
+    padding-bottom:10px; border-bottom:1px solid var(--border-soft);
+  }
+  .prompt .user{ color:var(--ok); font-weight:500; }
+  .prompt .at{ color:var(--text-faint); }
+  .prompt .host{ color:var(--accent); }
+  .prompt .path{ color:var(--text-dim); }
+  .prompt .sym{ color:var(--accent-strong); }
+  .prompt .cmd{ color:var(--text); font-weight:500; }
+  .cursor{ display:inline-block; width:7px; height:14px; background:var(--accent-strong); vertical-align:-2px; opacity:0; }
+  .prompt.is-active .cursor{ animation:blink 1.1s steps(1) infinite; opacity:1; }
+  .prompt.is-typing .cursor{ animation:none; opacity:1; }
+  @media (prefers-reduced-motion: reduce){
+    .cursor{ opacity:.7 !important; animation:none !important; }
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .comment{ color:var(--text-faint); }
+
+  /* ---------- hero / whoami ---------- */
+  .whoami-name{ font-size:clamp(28px,5vw,40px); font-weight:800; letter-spacing:-.01em; color:var(--text); }
+  .whoami-role{ margin-top:6px; font-size:16px; color:var(--accent-strong); font-weight:500; }
+  .whoami-loc{ margin-top:2px; font-size:13px; color:var(--text-dim); }
+  .whoami-stack{ margin-top:16px; font-size:13px; color:var(--text-dim); line-height:1.9; }
+  .whoami-stack b{ color:var(--text); font-weight:500; }
+  .whoami-tag{ margin-top:16px; max-width:62ch; color:var(--text-dim); font-size:14.5px; }
+
+  /* ---------- stat grid ---------- */
+  .stat-note{ font-size:12px; color:var(--text-faint); margin-bottom:16px; }
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--border-soft); border:1px solid var(--border-soft); border-radius:var(--radius); overflow:hidden; }
+  .stat-tile{ background:var(--bg-panel); padding:16px 16px 14px; }
+  .stat-label{ font-family:var(--mono-ui); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); }
+  .stat-value{ font-family:var(--mono-ui); font-size:26px; font-weight:700; color:var(--text); margin-top:6px; font-variant-numeric:tabular-nums; }
+  .stat-value.ok{ color:var(--ok); }
+  .stat-sub{ font-size:11.5px; color:var(--text-dim); margin-top:4px; }
+
+  .status-list{ margin-top:14px; border:1px solid var(--border-soft); border-radius:var(--radius); overflow:hidden; }
+  .status-row{ display:flex; align-items:center; gap:10px; padding:9px 14px; font-size:12.5px; background:var(--bg-panel); }
+  .status-row + .status-row{ border-top:1px solid var(--border-soft); }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--ok); flex-shrink:0; box-shadow:0 0 6px var(--ok); animation:pulse 2.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+  @media (prefers-reduced-motion: reduce){ .status-dot{ animation:none; } }
+  .status-name{ font-family:var(--mono-ui); color:var(--text); flex:1; }
+  .status-pill{ font-family:var(--mono-ui); font-size:10.5px; letter-spacing:.06em; color:var(--ok); background:var(--ok-soft); padding:2px 8px; border-radius:2px; }
+  .status-host{ color:var(--text-faint); font-size:11px; }
+
+  /* ---------- project grid ---------- */
+  .project-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+  .project-card{ background:var(--bg-panel); border:1px solid var(--border-soft); border-radius:var(--radius); padding:16px; transition:border-color .15s ease, transform .15s ease; }
+  .project-card:hover{ border-color:var(--accent-soft); border-color:var(--accent); transform:translateY(-1px); }
+  .project-name{ font-family:var(--mono-ui); font-size:14px; font-weight:700; color:var(--text); }
+  .project-desc{ font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.55; }
+  .project-metric{ font-size:12px; color:var(--accent-strong); margin-top:10px; font-family:var(--mono-ui); }
+  .project-tags{ margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+  .tag{ font-family:var(--mono-ui); font-size:10px; letter-spacing:.04em; color:var(--text-faint); border:1px solid var(--border); padding:2px 6px; border-radius:2px; }
+  .project-links{ margin-top:12px; display:flex; gap:14px; font-family:var(--mono-ui); font-size:11.5px; }
+
+  /* ---------- case studies ---------- */
+  .case{ background:var(--bg-panel); border:1px solid var(--border-soft); border-radius:var(--radius); padding:22px 22px 24px; margin-bottom:16px; }
+  .case-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .case-title{ font-family:var(--mono-ui); font-size:16px; font-weight:700; color:var(--text); }
+  .case-meta{ font-family:var(--mono-ui); font-size:11px; color:var(--text-faint); }
+  .flow{ font-family:var(--mono-ui); font-size:12px; color:var(--text-dim); background:var(--bg-panel-2); border:1px solid var(--border-soft); border-radius:var(--radius); padding:10px 12px; margin-bottom:16px; overflow-x:auto; white-space:nowrap; }
+  .flow .arrow{ color:var(--accent); margin:0 8px; }
+  .case-field{ margin-bottom:12px; }
+  .case-field:last-child{ margin-bottom:0; }
+  .case-field .k{ font-family:var(--mono-ui); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:4px; }
+  .case-field .v{ font-size:13.5px; color:var(--text-dim); max-width:70ch; line-height:1.6; }
+  .case-field.incident .v{ color:var(--text); }
+  .case-result{ margin-top:16px; display:flex; flex-wrap:wrap; gap:8px 22px; padding-top:14px; border-top:1px solid var(--border-soft); }
+  .case-result span{ font-family:var(--mono-ui); font-size:12.5px; color:var(--ok); }
+  .case-result b{ color:var(--text); font-weight:700; }
+
+  /* ---------- skills tree ---------- */
+  .tree{ font-family:var(--mono-ui); font-size:13px; line-height:2; }
+  .tree-layer{ margin-bottom:4px; }
+  .tree-layer .branch{ color:var(--text-faint); }
+  .tree-layer .layer-name{ color:var(--accent-strong); font-weight:500; }
+  .tree-layer .items{ color:var(--text-dim); }
+
+  /* ---------- infra log ---------- */
+  .log-line{ display:flex; gap:14px; padding:12px 0; border-top:1px solid var(--border-soft); font-size:13px; }
+  .log-line:first-child{ border-top:none; }
+  .log-tag{ font-family:var(--mono-ui); font-size:10.5px; letter-spacing:.06em; color:var(--accent); flex-shrink:0; width:96px; padding-top:2px; }
+  .log-text{ color:var(--text-dim); line-height:1.6; }
+  .log-text b{ color:var(--text); font-weight:500; }
+
+  /* ---------- footer ---------- */
+  footer{ padding:40px 0 60px; border-top:1px solid var(--border-soft); margin-top:40px; }
+  .contact-row{ display:flex; flex-wrap:wrap; gap:24px; font-family:var(--mono-ui); font-size:13.5px; margin-top:16px; }
+  .foot-note{ margin-top:28px; font-size:11.5px; color:var(--text-faint); }
+
+  @media (max-width:600px){
+    section{ padding:40px 0 4px; }
+    .term-path{ display:none; }
+  }
+</style>
+
+<div class="term-titlebar">
+  <div class="term-titlebar-inner">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="term-path"><b>evgeniimatveev</b> — zsh — 96×36</div>
+    <div class="term-clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="boot wrap" aria-hidden="true">
+  <div class="boot-line" style="animation-delay:.05s">Last login: $(date) on ttys000</div>
+  <div class="boot-line" style="animation-delay:.15s">connecting to <span class="ok">production</span>… <span class="ok">ok</span></div>
+</div>
+
+<main class="wrap">
+
+  <section id="whoami">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">whoami</span></span><span class="cursor"></span></div>
+    <div class="whoami-name">evgeniimatveev</div>
+    <div class="whoami-role">Analytics &amp; MLOps Engineer</div>
+    <div class="whoami-loc">Burbank, CA</div>
+    <div class="whoami-stack">
+      <b>stack</b> &nbsp;Python · SQL · dbt · Docker · GitHub Actions · OR-Tools · MLflow
+    </div>
+    <p class="whoami-tag">I build small production data &amp; ML systems end to end — pipeline, model, dashboard, deploy, and the monitoring that tells me when it breaks. Everything below is live, not a mockup.</p>
+  </section>
+
+  <section id="status">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">systemctl status --all</span></span><span class="cursor"></span></div>
+    <p class="stat-note">manual snapshot, last verified 2026‑08‑18 — not a live feed, see <a href="#infra">infra.log</a> for why</p>
+    <div class="stat-grid">
+      <div class="stat-tile">
+        <div class="stat-label">apps live</div>
+        <div class="stat-value ok">9<span style="color:var(--text-faint); font-size:16px;">/9</span></div>
+        <div class="stat-sub">Streamlit Cloud + HF Spaces</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">last 24h uptime</div>
+        <div class="stat-value ok">100%</div>
+        <div class="stat-sub">tracked via UptimeRobot</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">keepalive</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">Playwright /30min · curl /1hr</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">alerting</div>
+        <div class="stat-value">email·sms·call</div>
+        <div class="stat-sub">on all 9 monitors</div>
+      </div>
+    </div>
+
+    <div class="status-list">
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">route-optimization-vrp</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">crypto-onchain-dashboard</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">tech-layoffs-tracker</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">so-survey-analytics</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">weather-pipeline</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">interview-coach</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">job-market-pulse</span><span class="status-host">hf.space</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">olist-e-commerce-analytics</span><span class="status-host">hf.space</span><span class="status-pill">UP</span></div>
+      <div class="status-row"><span class="status-dot"></span><span class="status-name">uber-driver-analytics</span><span class="status-host">hf.space</span><span class="status-pill">UP</span></div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ls projects/ --sort=impact -la</span></span><span class="cursor"></span></div>
+    <div class="project-grid">
+
+      <div class="project-card">
+        <div class="project-name">route-optimization-vrp</div>
+        <div class="project-desc">Capacitated vehicle routing with time windows for a 45-stop LA delivery fleet, vs. a naive nearest-neighbor dispatcher.</div>
+        <div class="project-metric">18.7% distance saved · 100% vs 11% on-time</div>
+        <div class="project-tags"><span class="tag">OR-TOOLS</span><span class="tag">STREAMLIT</span><span class="tag">CVRPTW</span></div>
+        <div class="project-links"><a href="https://route-optimization-vrp.streamlit.app" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/route-optimization-vrp" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">mcp-data-quality-agent</div>
+        <div class="project-desc">MCP server exposing data-quality checks — profiling, anomalies, freshness, significance tests — over natural language, across 5 databases.</div>
+        <div class="project-metric">19 tools · 33/33 tests passing</div>
+        <div class="project-tags"><span class="tag">MCP</span><span class="tag">PYTHON</span><span class="tag">POSTGRES</span></div>
+        <div class="project-links"><a href="https://github.com/evgeniimatveev/mcp-data-quality-agent" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">cv-logistics-mlops</div>
+        <div class="project-desc">Computer-vision bin-count classifier with tracked experiments and a weekly automated retraining job.</div>
+        <div class="project-metric">MLflow + W&amp;B · weekly automation</div>
+        <div class="project-tags"><span class="tag">PYTORCH</span><span class="tag">MLFLOW</span><span class="tag">MLOPS</span></div>
+        <div class="project-links"><a href="https://github.com/evgeniimatveev/cv-logistics-mlops" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">crypto-onchain-dashboard</div>
+        <div class="project-desc">Daily-refreshing dashboard tracking price, dominance, and market sentiment across 8 crypto assets.</div>
+        <div class="project-metric">CoinGecko + Fear &amp; Greed Index</div>
+        <div class="project-tags"><span class="tag">DUCKDB</span><span class="tag">STREAMLIT</span></div>
+        <div class="project-links"><a href="https://crypto-onchain-dashboard.streamlit.app" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/crypto-dashboard" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">tech-layoffs-tracker</div>
+        <div class="project-desc">Explorer over tech-industry layoffs — by company, year, and industry — built from a public layoffs dataset.</div>
+        <div class="project-metric">2,412 events · 747K people · 1,713 companies</div>
+        <div class="project-tags"><span class="tag">DUCKDB</span><span class="tag">STREAMLIT</span></div>
+        <div class="project-links"><a href="https://layoffs-tracker-mdndinr8hfct5afvjwvjno.streamlit.app" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/layoffs-tracker" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">so-survey-analytics</div>
+        <div class="project-desc">Query interface over the 2024 Stack Overflow Developer Survey — salaries, remote work, language and stack trends.</div>
+        <div class="project-metric">65K developers · 20 SQL queries</div>
+        <div class="project-tags"><span class="tag">DUCKDB</span><span class="tag">SQL</span></div>
+        <div class="project-links"><a href="https://4cmjubresrab8nk6zhjqbv.streamlit.app" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/so-survey-analytics" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">job-market-pulse</div>
+        <div class="project-desc">Daily-refreshed job market analytics across 10 tech stacks and 10 US cities, pulled from the Adzuna API.</div>
+        <div class="project-metric">100+ API calls/day · daily refresh</div>
+        <div class="project-tags"><span class="tag">ADZUNA API</span><span class="tag">DUCKDB</span></div>
+        <div class="project-links"><a href="https://evgeniimatveevusa-job-market-pulse.hf.space" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/job-market-pulse" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">weather-pipeline</div>
+        <div class="project-desc">Global weather ETL running twice a day across 20 cities on 6 continents, with retry logic and graceful per-city failure.</div>
+        <div class="project-metric">20 cities · 6 continents · 2×/day</div>
+        <div class="project-tags"><span class="tag">OPEN-METEO</span><span class="tag">DUCKDB</span></div>
+        <div class="project-links"><a href="https://weather-pip-y645txqohstehewa3d3a4w.streamlit.app" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/weather-pipeline" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">olist-e-commerce-analytics</div>
+        <div class="project-desc">dbt-modeled e-commerce analytics over 100K+ Brazilian marketplace orders, with a tested transformation layer.</div>
+        <div class="project-metric">$13.2M revenue · 13 dbt models · 54 tests</div>
+        <div class="project-tags"><span class="tag">DBT</span><span class="tag">DUCKDB</span></div>
+        <div class="project-links"><a href="https://evgeniimatveevusa-olist-analytics.hf.space" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/olist-e-commerce-analytics" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">uber-driver-analytics</div>
+        <div class="project-desc">Three years of LA rideshare trip data broken down into earnings, timing, and route patterns.</div>
+        <div class="project-metric">3,448 trips · $70K gross</div>
+        <div class="project-tags"><span class="tag">POSTGRESQL</span><span class="tag">STREAMLIT</span></div>
+        <div class="project-links"><a href="https://evgeniimatveevusa-uber-driver-analytics.hf.space" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/uber-driver-analytics" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">interview-coach</div>
+        <div class="project-desc">Interactive interview trainer with 35 questions across 5 practice modes, streaming responses from the Claude API.</div>
+        <div class="project-metric">35 questions · 5 modes</div>
+        <div class="project-tags"><span class="tag">CLAUDE API</span><span class="tag">STREAMLIT</span></div>
+        <div class="project-links"><a href="https://ljtn7jxeawyetzefthttnc.streamlit.app" target="_blank" rel="noopener">live ↗</a><a href="https://github.com/evgeniimatveev/interview-coach" target="_blank" rel="noopener">source ↗</a></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="cases">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">cat projects/*/POSTMORTEM.md</span></span><span class="cursor"></span></div>
+
+    <div class="case">
+      <div class="case-head">
+        <div class="case-title">route-optimization-vrp</div>
+        <div class="case-meta">Google OR-Tools · CVRPTW</div>
+      </div>
+      <div class="flow">45 stops<span class="arrow">→</span>haversine distance matrix<span class="arrow">→</span>capacity + time-window dimensions<span class="arrow">→</span>guided local search<span class="arrow">→</span>route plan</div>
+      <div class="case-field"><span class="k">problem</span><div class="v">A naive nearest-neighbor dispatcher missed 40 of 45 delivery windows — it drives to the closest stop with no awareness of promised time slots.</div></div>
+      <div class="case-field"><span class="k">approach</span><div class="v">Capacitated VRP with time windows via Google OR-Tools: a haversine distance matrix, a capacity dimension and a separate time dimension with per-stop windows, disjunction-with-penalty so infeasible configs still return a partial plan instead of failing outright.</div></div>
+      <div class="case-field incident"><span class="k">incident — 2026-08-18</span><div class="v">The app was crashing in production with an <code>AttributeError</code>. Traced it to one line: <code>search_parameters.num_search_workers = 1</code> — a field that simply doesn't exist on the classic routing solver's <code>RoutingSearchParameters</code> proto in the pinned OR-Tools version (it belongs to CP-SAT's params, not this solver). Confirmed by enumerating the live proto's actual fields rather than trusting the earlier assumption, removed the line, verified the fix live within the hour.</div></div>
+      <div class="case-result">
+        <span><b>18.7%</b> distance saved</span>
+        <span><b>100%</b> vs <b>11%</b> on-time</span>
+        <span><b>~$82/day</b> saved</span>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="case-head">
+        <div class="case-title">mcp-data-quality-agent</div>
+        <div class="case-meta">Model Context Protocol server</div>
+      </div>
+      <div class="flow">natural-language question<span class="arrow">→</span>MCP tool routing<span class="arrow">→</span>SQL against 5 databases<span class="arrow">→</span>profiled result</div>
+      <div class="case-field"><span class="k">problem</span><div class="v">Data-quality checks — null patterns, duplicates, freshness, anomalies — were ad hoc, one-off scripts with no shared interface across databases.</div></div>
+      <div class="case-field"><span class="k">approach</span><div class="v">A 19-tool MCP server (profiling, anomaly detection, freshness checks, correlation, significance testing) that any MCP-compatible client can call directly against 5 connected databases.</div></div>
+      <div class="case-result">
+        <span><b>19</b> tools</span>
+        <span><b>33/33</b> tests passing</span>
+        <span><b>5</b> databases</span>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="case-head">
+        <div class="case-title">cv-logistics-mlops</div>
+        <div class="case-meta">Computer vision + MLOps</div>
+      </div>
+      <div class="flow">bin image<span class="arrow">→</span>CV classifier<span class="arrow">→</span>MLflow / W&amp;B tracking<span class="arrow">→</span>weekly retrain job</div>
+      <div class="case-field"><span class="k">problem</span><div class="v">Manual bin-count checks in a logistics workflow are slow and inconsistent between people.</div></div>
+      <div class="case-field"><span class="k">approach</span><div class="v">A CV classifier with every experiment tracked in MLflow and Weights &amp; Biases, wired to a scheduled retraining job so the model doesn't quietly drift.</div></div>
+      <div class="case-result">
+        <span>running in production</span>
+        <span>weekly automated retrain</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="infra">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">cat infra.log</span></span><span class="cursor"></span></div>
+
+    <div class="log-line">
+      <div class="log-tag">KEEPALIVE</div>
+      <div class="log-text">Streamlit Cloud only resets its sleep timer on a real browser session — a plain HTTP ping just returns the "sleeping" splash page. Fixed with a <b>Playwright headless-Chromium ping every 30 minutes</b> across a GitHub Actions cron. HF Spaces don't need that — their free tier wakes on any <b>plain HTTP request, so an hourly curl is enough.</b></div>
+    </div>
+    <div class="log-line">
+      <div class="log-tag">MONITORING</div>
+      <div class="log-text">All <b>9 live apps</b> sit behind UptimeRobot with email/SMS/voice alerting. The last two were added the same day a "fix" for an intermittent crash turned it into a guaranteed one — the app was broken and live for hours before anyone noticed by hand.</div>
+    </div>
+    <div class="log-line">
+      <div class="log-tag">CI/CD</div>
+      <div class="log-text">Every repo runs its <b>pytest</b> suite in GitHub Actions before anything ships — routing feasibility, capacity limits, time-window compliance, and "optimized actually beats baseline" are all asserted, not eyeballed.</div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tree skills/</span></span><span class="cursor"></span></div>
+    <div class="tree">
+      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">collect</span> <span class="items">— Python · REST APIs · Kaggle datasets · web scraping</span></div>
+      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">store</span> &nbsp;&nbsp;&nbsp;<span class="items">— PostgreSQL · DuckDB · MotherDuck · Snowflake · Supabase</span></div>
+      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">transform</span><span class="items">— dbt · pandas · SQL (window functions, CTEs)</span></div>
+      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">model</span> &nbsp;&nbsp;<span class="items">— OR-Tools · MLflow · Weights &amp; Biases · XGBoost / CatBoost / LightGBM</span></div>
+      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">serve</span> &nbsp;&nbsp;<span class="items">— Streamlit · FastAPI · Plotly · pydeck</span></div>
+      <div class="tree-layer"><span class="branch">└──</span> <span class="layer-name">operate</span> &nbsp;<span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="prompt" style="border-bottom:none; margin-bottom:0;"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
+    <div class="contact-row">
+      <a href="https://github.com/evgeniimatveev" target="_blank" rel="noopener">github.com/evgeniimatveev ↗</a>
+      <a href="https://www.linkedin.com/in/evgenii-matveev-510926276/" target="_blank" rel="noopener">linkedin ↗</a>
+      <a href="https://www.datascienceportfol.io/evgeniimatveevusa" target="_blank" rel="noopener">datascienceportfol.io ↗</a>
+      <a href="mailto:evgeniimatveevusa@gmail.com">evgeniimatveevusa@gmail.com</a>
+    </div>
+    <div class="foot-note">built with Claude Code · deployed on GitHub Pages · last rebuilt 2026-08-18</div>
+  </footer>
+
+</main>
+
+<script>
+  function tick(){
+    var el = document.getElementById('clock');
+    if(!el) return;
+    var d = new Date();
+    var p = function(n){ return String(n).padStart(2,'0'); };
+    el.textContent = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var prompts = Array.prototype.slice.call(document.querySelectorAll('.prompt'));
+  var activePrompt = null;
+
+  function setActive(promptEl){
+    if(activePrompt && activePrompt !== promptEl){
+      activePrompt.classList.remove('is-active');
+    }
+    activePrompt = promptEl;
+    promptEl.classList.add('is-active');
+  }
+
+  function typePrompt(promptEl){
+    var textEl = promptEl.querySelector('.cmd-text');
+    if(!textEl || textEl.dataset.typed === '1') { setActive(promptEl); return; }
+    textEl.dataset.typed = '1';
+    var full = textEl.textContent;
+
+    if(reduceMotion){
+      setActive(promptEl);
+      return;
+    }
+
+    textEl.textContent = '';
+    promptEl.classList.add('is-typing');
+    var i = 0;
+    (function step(){
+      textEl.textContent = full.slice(0, i);
+      i++;
+      if(i <= full.length){
+        setTimeout(step, 22 + Math.random() * 26);
+      } else {
+        promptEl.classList.remove('is-typing');
+        setActive(promptEl);
+      }
+    })();
+  }
+
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          typePrompt(entry.target);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.55 });
+
+    prompts.forEach(function(p, idx){
+      if(idx === 0){ typePrompt(p); }
+      else { io.observe(p); }
+    });
+  } else {
+    prompts.forEach(typePrompt);
+  }
+</script>
