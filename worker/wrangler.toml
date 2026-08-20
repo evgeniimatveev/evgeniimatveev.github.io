@@ -2,12 +2,17 @@ name = "evgeniimatveev-ask"
 main = "worker.js"
 compatibility_date = "2026-08-19"
 
-# Created via: wrangler kv namespace create RATE_LIMIT
-# Then paste the returned id below.
 kv_namespaces = [
-  { binding = "RATE_LIMIT", id = "REPLACE_WITH_KV_NAMESPACE_ID" }
+  { binding = "RATE_LIMIT", id = "6c7f6a57fde14f31821af93cc069fc86" }
 ]
 
-# Secret (do NOT put the real value here — set via `wrangler secret put ANTHROPIC_API_KEY`
-# or the Cloudflare dashboard):
-#   ANTHROPIC_API_KEY
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "evgeniimatveev-corpus"
+
+[ai]
+binding = "AI"
+
+# Secrets (set via `wrangler secret put <NAME>`, not stored here):
+#   ANTHROPIC_API_KEY — Anthropic API key used for the ask widget's answers
+#   ADMIN_KEY          — internal token gating the /admin/ingest route
