@@ -34,9 +34,18 @@ async function pingAll(env) {
   return results;
 }
 
+async function runScheduled(env) {
+  try {
+    const results = await pingAll(env);
+    console.log("keepalive run:\n" + results.join("\n"));
+  } catch (e) {
+    console.error("keepalive run failed:", e && e.stack ? e.stack : e);
+  }
+}
+
 export default {
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(pingAll(env));
+    ctx.waitUntil(runScheduled(env));
   },
 
   // Manual trigger / health check — visiting the Worker URL runs the same ping.
