@@ -15,23 +15,30 @@ const URLS = [
   "https://ljtn7jxeawyetzefthttnc.streamlit.app",
 ];
 
+async function pingOne(browser, url) {
+  const page = await browser.newPage();
+  try {
+    const res = await page.goto(url, { waitUntil: "load", timeout: 20000 });
+    await new Promise((r) => setTimeout(r, 1500));
+    return `OK  ${url} -> HTTP ${res.status()}`;
+  } catch (e) {
+    return `ERR ${url} -> ${String(e.message || e).split("\n")[0]}`;
+  } finally {
+    await page.close();
+  }
+}
+
 async function pingAll(env) {
   const browser = await puppeteer.launch(env.MYBROWSER);
-  const results = [];
-  for (const url of URLS) {
-    const page = await browser.newPage();
-    try {
-      const res = await page.goto(url, { waitUntil: "load", timeout: 60000 });
-      await new Promise((r) => setTimeout(r, 3000));
-      results.push(`OK  ${url} -> HTTP ${res.status()}`);
-    } catch (e) {
-      results.push(`ERR ${url} -> ${String(e.message || e).split("\n")[0]}`);
-    } finally {
-      await page.close();
-    }
+  try {
+    // Parallel, not sequential — keeps total run well under the scheduled
+    // handler's time budget so browser.close() below always gets reached
+    // (a run that got killed mid-loop left the browser session dangling,
+    // which then blocked the next cron's launch() with a 429).
+    return await Promise.all(URLS.map((url) => pingOne(browser, url)));
+  } finally {
+    await browser.close();
   }
-  await browser.close();
-  return results;
 }
 
 async function runScheduled(env) {

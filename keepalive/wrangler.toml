@@ -7,7 +7,13 @@ compatibility_flags = ["nodejs_compat"]
 binding = "MYBROWSER"
 
 [triggers]
-crons = ["*/30 * * * *"]
+# Every 4 hours (6 runs/day), not every 30 min — Workers Free plan's
+# Browser Rendering budget is only 10 browser-minutes/day, which a
+# 30-min cadence blows through by mid-morning. GitHub Actions
+# (layoffs-tracker/.github/workflows/keepalive.yml) already runs the
+# real every-30-min keepalive reliably; this Worker is a secondary,
+# lower-frequency backup, not the primary.
+crons = ["0 */4 * * *"]
 
 [observability]
 enabled = true
