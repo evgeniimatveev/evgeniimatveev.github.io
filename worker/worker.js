@@ -8,11 +8,11 @@ const IP_DAILY_LIMIT = 20;
 const GLOBAL_DAILY_LIMIT = 250;
 const KV_TTL_SECONDS = 172800; // 2 days — safe buffer past the UTC day boundary
 
-const EMBEDDING_MODEL = "@cf/baai/bge-base-en-v1.5";
+const EMBEDDING_MODEL = "@cf/baai/bge-m3";
 const TOP_K = 6;
 const MIN_SCORE = 0.3; // below this, a retrieved chunk is probably irrelevant noise
 
-const STATIC_IDENTITY = `You are answering, in first person as Evgenii Matveev, short factual questions a recruiter or hiring manager asks about his background, on his own portfolio site. Answer in 2-4 sentences, plain text, no markdown, confident and specific, based only on the CONTEXT provided below (retrieved from his real projects, READMEs, and interview prep notes). If the context does not cover what's asked, say you don't have that detail on hand and point to his resume, LinkedIn, or email instead of guessing. Never invent numbers or claims not present in the context.
+const STATIC_IDENTITY = `You are answering, in first person as Evgenii Matveev, short factual questions a recruiter or hiring manager asks about his background, on his own portfolio site. Answer in 2-4 sentences, plain text, no markdown, confident and specific, based only on the CONTEXT provided below (retrieved from his real projects, READMEs, and interview prep notes). If the context does not cover what's asked, say you don't have that detail on hand and point to his resume, LinkedIn, or email instead of guessing. Never invent numbers or claims not present in the context. Match the language of the question in your reply.
 
 Core facts always true: Analytics & MLOps Engineer, based in Burbank, CA, actively job searching. Stack: Python, SQL, dbt, Docker, GitHub Actions, OR-Tools, MLflow, PostgreSQL, DuckDB, Snowflake, Streamlit, FastAPI. Contact: github.com/evgeniimatveev, linkedin.com/in/evgenii-matveev-510926276, evgeniimatveevusa@gmail.com.`;
 
@@ -30,6 +30,17 @@ function json(body, status, headers) {
     status: status || 200,
     headers: Object.assign({ "Content-Type": "application/json" }, headers || {}),
   });
+}
+
+function detectScriptHint(text) {
+  if (/[一-鿿]/.test(text)) return "Reply in Chinese.";
+  if (/[぀-ヿ]/.test(text)) return "Reply in Japanese.";
+  if (/[가-힯]/.test(text)) return "Reply in Korean.";
+  if (/[Ѐ-ӿ]/.test(text)) return "Reply in Russian.";
+  if (/[؀-ۿ]/.test(text)) return "Reply in Arabic.";
+  if (/[฀-๿]/.test(text)) return "Reply in Thai.";
+  if (/[֐-׿]/.test(text)) return "Reply in Hebrew.";
+  return null;
 }
 
 async function embed(env, text) {
@@ -87,6 +98,13 @@ async function handleAsk(request, env, ctx, cors) {
     ? `${STATIC_IDENTITY}\n\nCONTEXT:\n${contextBlock}`
     : STATIC_IDENTITY;
 
+  // A general "answer in the question's language" instruction buried in a long
+  // system prompt isn't reliable enough on its own for non-Latin scripts —
+  // attach an explicit directive directly next to the question itself instead,
+  // which the model follows far more consistently than a system-level rule.
+  const scriptHint = detectScriptHint(question);
+  const userContent = scriptHint ? `[${scriptHint}]\n\n${question}` : question;
+
   let anthropicRes;
   try {
     anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
@@ -98,9 +116,10 @@ async function handleAsk(request, env, ctx, cors) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5",
-        max_tokens: 220,
+        max_tokens: 600,
+        temperature: 0,
         system: systemPrompt,
-        messages: [{ role: "user", content: question }],
+        messages: [{ role: "user", content: userContent }],
       }),
     });
   } catch (e) {
