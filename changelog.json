@@ -1,1 +1,6 @@
-[]
+[
+  {
+    "date": "2026-08-20",
+    "summary": "Portfolio site launched with live ask widget, build log, and Cloudflare Worker integration; market report updated."
+  }
+]
