@@ -25,6 +25,10 @@ FACTS:
   - crypto-onchain-dashboard — daily crypto dashboard across 8 assets (CoinGecko + Fear & Greed Index).
   - tech-layoffs-tracker — explorer over 2,412 tech layoff events, 747K people, 1,713 companies.
 - All 9 live web apps sit behind UptimeRobot monitoring with email/SMS/voice alerting.
+- Beyond these 12 flagship projects, maintains 30+ GitHub repositories with all CI/CD pipelines green, including deep SQL/R practice work (R-Programming-A-Z, Advanced-R-for-Analytics).
+- Completed a full structured Snowflake curriculum end to end, from core SQL through cost monitoring and optimization.
+- Systematically prepares for both technical and behavioral interviews — structured practice, live SQL drills, mock interviews.
+- Open to freelance data cleaning / SQL analysis work (via Upwork) alongside the full-time job search.
 - Contact: github.com/evgeniimatveev, linkedin.com/in/evgenii-matveev-510926276, evgeniimatveevusa@gmail.com.`;
 
 function corsHeaders(origin) {
