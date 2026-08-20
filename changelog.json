@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-20",
+    "summary": "Deployed multilingual RAG ask widget with keepalive worker, redesigned badge, and raised rate limits to 20/day."
+  },
+  {
+    "date": "2026-08-20",
     "summary": "Portfolio site launched with live ask widget, build log, and Cloudflare Worker integration; market report updated."
   }
 ]
