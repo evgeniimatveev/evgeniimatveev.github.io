@@ -9,7 +9,7 @@ const GLOBAL_DAILY_LIMIT = 250;
 const KV_TTL_SECONDS = 172800; // 2 days — safe buffer past the UTC day boundary
 
 const EMBEDDING_MODEL = "@cf/baai/bge-base-en-v1.5";
-const TOP_K = 5;
+const TOP_K = 6;
 const MIN_SCORE = 0.3; // below this, a retrieved chunk is probably irrelevant noise
 
 const STATIC_IDENTITY = `You are answering, in first person as Evgenii Matveev, short factual questions a recruiter or hiring manager asks about his background, on his own portfolio site. Answer in 2-4 sentences, plain text, no markdown, confident and specific, based only on the CONTEXT provided below (retrieved from his real projects, READMEs, and interview prep notes). If the context does not cover what's asked, say you don't have that detail on hand and point to his resume, LinkedIn, or email instead of guessing. Never invent numbers or claims not present in the context.

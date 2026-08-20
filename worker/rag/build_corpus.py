@@ -132,6 +132,17 @@ EXTRA_RECORDS = [
         "text": "All 9 live apps sit behind UptimeRobot with email/SMS/voice alerting. The last two monitors were added the same day a fix for an intermittent crash turned it into a guaranteed one — the app was broken and live for hours before anyone noticed by hand.",
     },
     {
+        "id": "bio:tableau_deployment",
+        "source": "stack clarification",
+        "text": (
+            "Evgenii is strong in Tableau specifically — he holds a Tableau certificate listed on his LinkedIn profile, "
+            "not just general familiarity, and uses it for interactive dashboards and data storytelling (filters, calculated fields, executive-ready visuals). "
+            "On deployment: he uses Hugging Face mainly as storage — 4 datasets hosted there — while the actual dashboard "
+            "applications (the interactive UI people click through) run on Streamlit Cloud, including the ones referenced as "
+            "'HF Spaces' in older docs. In practice, Streamlit Cloud is his primary app-hosting platform across nearly all portfolio projects."
+        ),
+    },
+    {
         "id": "infra:cicd",
         "source": "site infra.log",
         "text": "Every repo runs its pytest suite in GitHub Actions before anything ships — routing feasibility, capacity limits, time-window compliance, and optimized actually beats baseline are all asserted, not eyeballed.",
