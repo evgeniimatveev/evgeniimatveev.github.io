@@ -185,6 +185,20 @@
   }
 
   /* ---------- ask widget ---------- */
+  .ask-featured .ask-box{
+    border:1px solid var(--accent);
+    box-shadow:0 0 0 1px var(--accent-soft), 0 0 32px -4px var(--accent-soft);
+    padding:20px 20px 18px;
+  }
+  .ask-badge{
+    display:inline-block; margin:2px 0 10px; padding:3px 10px;
+    font-family:var(--mono-ui); font-size:11px; font-weight:600; letter-spacing:.03em;
+    color:var(--accent-strong); background:var(--accent-soft); border:1px solid var(--accent);
+    border-radius:20px; animation:badge-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes badge-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.72; } }
+  @media (prefers-reduced-motion: reduce){ .ask-badge{ animation:none; } }
+  .ask-featured .ask-input{ font-size:14.5px; padding:10px 12px; }
   .ask-box{ border:1px solid var(--border-soft); border-radius:var(--radius); background:var(--bg-panel); padding:14px 16px; }
   .ask-log{ display:flex; flex-direction:column; gap:12px; margin-bottom:10px; max-height:420px; overflow-y:auto; }
   .ask-log:empty{ display:none; }
@@ -228,6 +242,21 @@
       <b>stack</b> &nbsp;Python · SQL · dbt · Docker · GitHub Actions · OR-Tools · MLflow
     </div>
     <p class="whoami-tag">I build small production data &amp; ML systems end to end — pipeline, model, dashboard, deploy, and the monitoring that tells me when it breaks. Everything below is live, not a mockup.</p>
+  </section>
+
+  <section id="ask" class="ask-featured">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ask --live</span></span><span class="cursor"></span></div>
+    <span class="ask-badge">★ talk to an AI trained on this whole page</span>
+    <p class="stat-note">ask a real question, get a real answer — grounded in everything below, generated live by Claude (Haiku 4.5)</p>
+    <div class="ask-box">
+      <div id="ask-log" class="ask-log"></div>
+      <form id="ask-form" class="ask-form">
+        <span class="ask-prompt-sym">&gt;</span>
+        <input id="ask-input" class="ask-input" type="text" maxlength="220" autocomplete="off" placeholder="e.g. what's your experience with dbt?" />
+        <button type="submit" class="ask-submit">send</button>
+      </form>
+      <div id="ask-hint" class="ask-hint">a few questions per visit · rate-limited to keep this running for everyone</div>
+    </div>
   </section>
 
   <section id="status">
@@ -439,20 +468,6 @@
       <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">model</span> &nbsp;&nbsp;<span class="items">— OR-Tools · MLflow · Weights &amp; Biases · XGBoost / CatBoost / LightGBM</span></div>
       <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">serve</span> &nbsp;&nbsp;<span class="items">— Streamlit · FastAPI · Plotly · pydeck</span></div>
       <div class="tree-layer"><span class="branch">└──</span> <span class="layer-name">operate</span> &nbsp;<span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span></div>
-    </div>
-  </section>
-
-  <section id="ask">
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ask --live</span></span><span class="cursor"></span></div>
-    <p class="stat-note">ask a real question, get a real answer — grounded in everything above, generated live by Claude (Haiku 4.5)</p>
-    <div class="ask-box">
-      <div id="ask-log" class="ask-log"></div>
-      <form id="ask-form" class="ask-form">
-        <span class="ask-prompt-sym">&gt;</span>
-        <input id="ask-input" class="ask-input" type="text" maxlength="220" autocomplete="off" placeholder="e.g. what's your experience with dbt?" />
-        <button type="submit" class="ask-submit">send</button>
-      </form>
-      <div id="ask-hint" class="ask-hint">a few questions per visit · rate-limited to keep this running for everyone</div>
     </div>
   </section>
 
