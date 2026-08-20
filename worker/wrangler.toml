@@ -1,0 +1,13 @@
+name = "evgeniimatveev-ask"
+main = "worker.js"
+compatibility_date = "2026-08-19"
+
+# Created via: wrangler kv namespace create RATE_LIMIT
+# Then paste the returned id below.
+kv_namespaces = [
+  { binding = "RATE_LIMIT", id = "REPLACE_WITH_KV_NAMESPACE_ID" }
+]
+
+# Secret (do NOT put the real value here — set via `wrangler secret put ANTHROPIC_API_KEY`
+# or the Cloudflare dashboard):
+#   ANTHROPIC_API_KEY

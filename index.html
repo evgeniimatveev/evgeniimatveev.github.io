@@ -183,6 +183,25 @@
     section{ padding:40px 0 4px; }
     .term-path{ display:none; }
   }
+
+  /* ---------- ask widget ---------- */
+  .ask-box{ border:1px solid var(--border-soft); border-radius:var(--radius); background:var(--bg-panel); padding:14px 16px; }
+  .ask-log{ display:flex; flex-direction:column; gap:12px; margin-bottom:10px; max-height:420px; overflow-y:auto; }
+  .ask-log:empty{ display:none; }
+  .ask-q{ font-family:var(--mono-ui); font-size:13px; color:var(--accent-strong); }
+  .ask-q b{ color:var(--text-faint); font-weight:500; margin-right:6px; }
+  .ask-a{ font-size:13.5px; color:var(--text-dim); line-height:1.6; padding-left:14px; border-left:2px solid var(--border); white-space:pre-wrap; }
+  .ask-a.pending{ color:var(--text-faint); font-style:italic; }
+  .ask-a.err{ color:var(--critical); }
+  .ask-form{ display:flex; align-items:center; gap:8px; border-top:1px solid var(--border-soft); padding-top:12px; }
+  .ask-prompt-sym{ color:var(--accent-strong); font-family:var(--mono-ui); }
+  .ask-input{ flex:1; background:var(--bg-panel-2); border:1px solid var(--border); border-radius:2px; color:var(--text); font-family:var(--mono-body); font-size:13.5px; padding:8px 10px; min-width:0; }
+  .ask-input:focus{ outline:none; border-color:var(--accent); }
+  .ask-input:disabled{ opacity:.5; }
+  .ask-submit{ font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong); background:var(--accent-soft); border:1px solid var(--accent); border-radius:2px; padding:8px 14px; cursor:pointer; flex-shrink:0; }
+  .ask-submit:hover{ background:var(--accent); color:var(--bg); }
+  .ask-submit:disabled{ opacity:.5; cursor:not-allowed; }
+  .ask-hint{ margin-top:10px; font-size:11px; color:var(--text-faint); font-family:var(--mono-ui); }
 </style>
 
 <div class="term-titlebar">
@@ -423,6 +442,26 @@
     </div>
   </section>
 
+  <section id="ask">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ask --live</span></span><span class="cursor"></span></div>
+    <p class="stat-note">ask a real question, get a real answer — grounded in everything above, generated live by Claude (Haiku 4.5)</p>
+    <div class="ask-box">
+      <div id="ask-log" class="ask-log"></div>
+      <form id="ask-form" class="ask-form">
+        <span class="ask-prompt-sym">&gt;</span>
+        <input id="ask-input" class="ask-input" type="text" maxlength="220" autocomplete="off" placeholder="e.g. what's your experience with dbt?" />
+        <button type="submit" class="ask-submit">send</button>
+      </form>
+      <div id="ask-hint" class="ask-hint">a few questions per visit · rate-limited to keep this running for everyone</div>
+    </div>
+  </section>
+
+  <section id="buildlog">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tail -f build.log</span></span><span class="cursor"></span></div>
+    <p class="stat-note">auto-generated daily by a GitHub Action + Claude, summarizing real commits across the repos above — not hand-written</p>
+    <div id="buildlog-list" class="status-list"></div>
+  </section>
+
   <footer>
     <div class="prompt" style="border-bottom:none; margin-bottom:0;"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
     <div class="contact-row">
@@ -502,4 +541,110 @@
   } else {
     prompts.forEach(typePrompt);
   }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  // ---------- ask widget ----------
+  // TODO: set this to the deployed Cloudflare Worker URL, e.g.
+  // 'https://evgeniimatveev-ask.<your-subdomain>.workers.dev'
+  var ASK_ENDPOINT = '';
+  var ASK_MAX_PER_VISIT = 6;
+
+  (function initAsk(){
+    var askForm = document.getElementById('ask-form');
+    var askInput = document.getElementById('ask-input');
+    var askLog = document.getElementById('ask-log');
+    var askHint = document.getElementById('ask-hint');
+    if(!askForm || !askInput || !askLog) return;
+    var askSubmit = askForm.querySelector('.ask-submit');
+    var askedCount = 0;
+
+    if(!ASK_ENDPOINT){
+      askHint.textContent = 'ask is warming up — email works meanwhile: evgeniimatveevusa@gmail.com';
+    }
+
+    askForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var q = askInput.value.trim();
+      if(!q) return;
+
+      if(!ASK_ENDPOINT){
+        askHint.textContent = 'ask isn\'t connected yet — email works meanwhile: evgeniimatveevusa@gmail.com';
+        return;
+      }
+      if(askedCount >= ASK_MAX_PER_VISIT){
+        askHint.textContent = 'question limit reached for this visit — email me instead';
+        return;
+      }
+      askedCount++;
+      askInput.value = '';
+      askInput.disabled = true;
+      askSubmit.disabled = true;
+
+      var qEl = document.createElement('div');
+      qEl.className = 'ask-q';
+      qEl.innerHTML = '<b>&gt;</b>' + escapeHtml(q);
+      askLog.appendChild(qEl);
+
+      var aEl = document.createElement('div');
+      aEl.className = 'ask-a pending';
+      aEl.textContent = 'thinking…';
+      askLog.appendChild(aEl);
+      askLog.scrollTop = askLog.scrollHeight;
+
+      fetch(ASK_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q })
+      }).then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(data){
+          return { ok: res.ok, data: data };
+        });
+      }).then(function(result){
+        aEl.classList.remove('pending');
+        if(result.ok && result.data && result.data.answer){
+          aEl.textContent = result.data.answer;
+        } else if(result.data && result.data.error === 'rate_limited'){
+          aEl.classList.add('err');
+          aEl.textContent = 'rate limit hit — try again tomorrow, or just email me.';
+        } else {
+          aEl.classList.add('err');
+          aEl.textContent = 'ask is offline right now — email works: evgeniimatveevusa@gmail.com';
+        }
+      }).catch(function(){
+        aEl.classList.remove('pending');
+        aEl.classList.add('err');
+        aEl.textContent = 'ask is offline right now — email works: evgeniimatveevusa@gmail.com';
+      }).finally(function(){
+        askInput.disabled = false;
+        askSubmit.disabled = false;
+        askInput.focus();
+        askLog.scrollTop = askLog.scrollHeight;
+      });
+    });
+  })();
+
+  // ---------- build.log (AI changelog) ----------
+  (function initBuildLog(){
+    var el = document.getElementById('buildlog-list');
+    if(!el) return;
+    fetch('changelog.json', { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(entries){
+        if(!entries || !entries.length){
+          el.innerHTML = '<div class="status-row"><span class="status-name" style="color:var(--text-faint)">no entries yet — first run pending</span></div>';
+          return;
+        }
+        el.innerHTML = entries.map(function(e){
+          return '<div class="status-row"><span class="status-host" style="width:80px;flex-shrink:0;">' + escapeHtml(e.date) + '</span><span class="status-name">' + escapeHtml(e.summary) + '</span></div>';
+        }).join('');
+      })
+      .catch(function(){
+        el.innerHTML = '<div class="status-row"><span class="status-name" style="color:var(--text-faint)">build.log unavailable</span></div>';
+      });
+  })();
 </script>
