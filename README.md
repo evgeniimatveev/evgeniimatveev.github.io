@@ -19,7 +19,7 @@ A terminal-emulator portfolio site — no framework, one `index.html`, styled an
 - **`whoami` / `systemctl status --all`** — identity, stack, and a live uptime snapshot across 9 deployed apps
 - **`ls projects/`** — 12 deployed portfolio projects, sorted by impact, each with live demo + source links
 - **`cat POSTMORTEM.md`** — real incident write-ups (root cause, fix, verification), not sanitized case studies
-- **`ask --live`** — type a question, get a real answer from Claude, grounded via RAG over the actual project corpus (see below)
+- **`ask --live`** — type a question in *any language*, get a real answer from Claude, grounded via RAG over the actual project corpus (see below)
 - **`tail -f build.log`** — a daily AI-generated changelog summarizing real commits across every tracked repo
 - **`cat infra.log`** — the operational reality: keepalive strategy, monitoring, CI/CD, written honestly
 
@@ -33,8 +33,8 @@ flowchart TB
 
     subgraph AskFlow["ask --live"]
         Site -->|"question"| Worker["Cloudflare Worker<br/>evgeniimatveev-ask"]
-        Worker -->|"embed question"| AI["Workers AI<br/>bge-base-en-v1.5"]
-        AI --> Vec["Vectorize<br/>306 chunks: READMEs · STAR stories · case studies"]
+        Worker -->|"embed question"| AI["Workers AI<br/>bge-m3 (multilingual)"]
+        AI --> Vec["Vectorize<br/>307 chunks: READMEs · STAR stories · case studies"]
         Vec -->|"top-6 matches"| Worker
         Worker -->|"question + retrieved context"| Claude["Claude Haiku 4.5"]
         Claude -->|"answer"| Site
@@ -56,7 +56,7 @@ Two independent AI features, two different techniques on purpose:
 | Trigger | User question | Daily cron |
 | Grounding | RAG (Vectorize + Workers AI embeddings) | Direct context (recent commit messages) |
 | Model | Claude Haiku 4.5 | Claude Haiku 4.5 |
-| Why this approach | Corpus (306 chunks, 33 repos) too large to stuff into every prompt | Small, one-shot input — no retrieval needed |
+| Why this approach | Corpus (307 chunks, 33 repos) too large to stuff into every prompt | Small, one-shot input — no retrieval needed |
 
 ## The RAG corpus
 
@@ -66,6 +66,13 @@ Built from real, public sources — not invented content:
 - 11 achievement-focused STAR interview stories (curated — no "weaknesses" or "why I'm leaving" content, that's for real interviews, not a public bot)
 - Site case studies / postmortems
 - Bio facts, verified against primary sources when corrected (see `worker/rag/build_corpus.py` for the full pipeline)
+
+**Multilingual by design.** The corpus itself is English, but embeddings run on
+`bge-m3` (100+ languages) instead of an English-only model, and the Worker
+detects the question's script and instructs Claude to reply in kind — tested
+clean across Russian, Chinese, Japanese, Korean, German, French, Portuguese,
+and Spanish. Ask it anything in your own language; it translates the
+underlying facts on the fly rather than refusing or switching to English.
 
 Rebuilding it after a source changes:
 ```bash
