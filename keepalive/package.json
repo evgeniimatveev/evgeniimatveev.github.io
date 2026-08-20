@@ -1,0 +1,7 @@
+{
+  "name": "streamlit-keepalive",
+  "private": true,
+  "dependencies": {
+    "@cloudflare/puppeteer": "^1.0.2"
+  }
+}

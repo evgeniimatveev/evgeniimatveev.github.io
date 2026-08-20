@@ -447,7 +447,7 @@
 
     <div class="log-line">
       <div class="log-tag">KEEPALIVE</div>
-      <div class="log-text">Streamlit Cloud only resets its sleep timer on a real browser session — a plain HTTP ping just returns the "sleeping" splash page. Fixed with a <b>Playwright headless-Chromium ping every 30 minutes</b> across a GitHub Actions cron. HF Spaces don't need that — their free tier wakes on any <b>plain HTTP request, so an hourly curl is enough.</b></div>
+      <div class="log-text">Streamlit Cloud only resets its sleep timer on a real browser session — a plain HTTP ping just returns the "sleeping" splash page. Originally fixed with a Playwright headless-Chromium ping every 30 minutes on a GitHub Actions runner; <b>migrating to a Cloudflare Worker on Browser Rendering</b> — same headless-browser requirement, no GitHub-hosted runner needed. Running both in parallel until a few days of Browser Rendering usage data confirm it stays inside the free-tier quota, then the GitHub Actions job gets deleted. HF Spaces don't need any of this — their free tier wakes on any <b>plain HTTP request, so an hourly curl is enough.</b></div>
     </div>
     <div class="log-line">
       <div class="log-tag">MONITORING</div>
