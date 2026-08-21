@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-08-21",
+    "summary": "Migrated DuckDB storage to Cloudflare R2 across pipelines, fixed weather dependency, optimized streamlit keepalive pings."
+  },
+  {
     "date": "2026-08-20",
     "summary": "Deployed multilingual RAG ask widget with keepalive worker, redesigned badge, and raised rate limits to 20/day."
   },
