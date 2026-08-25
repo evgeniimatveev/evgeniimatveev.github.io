@@ -4,7 +4,7 @@ Proxies questions from the `ask` widget on evgeniimatveev.github.io to Claude
 (Haiku 4.5), grounded via **RAG**: Workers AI generates embeddings, Vectorize
 does semantic search over a corpus built from all public repo READMEs,
 curated STAR interview stories, and site case studies. The Anthropic API key
-never touches the static site. Adds a per-IP (8/day) and global (250/day)
+never touches the static site. Adds a per-IP (10/day) and global (250/day)
 rate limit backed by Workers KV, so cost stays bounded no matter what.
 
 ## Architecture

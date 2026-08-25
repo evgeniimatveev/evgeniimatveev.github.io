@@ -4,7 +4,7 @@
 // Deploy: see worker/README.md
 
 const ALLOWED_ORIGIN = "https://evgeniimatveev.github.io";
-const IP_DAILY_LIMIT = 20;
+const IP_DAILY_LIMIT = 10;
 const GLOBAL_DAILY_LIMIT = 250;
 const KV_TTL_SECONDS = 172800; // 2 days — safe buffer past the UTC day boundary
 
