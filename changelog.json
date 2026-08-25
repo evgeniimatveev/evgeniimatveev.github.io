@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-08-25",
+    "summary": "Deployed OR-Tools worker isolation for crash resilience, market report refresh, and tightened API rate limits to 10/day."
+  },
+  {
     "date": "2026-08-24",
     "summary": "Updated layoffs tracker with latest data and published weekly market report."
   },
