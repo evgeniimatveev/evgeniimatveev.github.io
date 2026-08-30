@@ -220,13 +220,13 @@
 
   /* ---------- tic-tac-toe ---------- */
   .ttt-board{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
-    max-width:240px; background:var(--border-soft); border:1px solid var(--border-soft);
+    display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin:0 auto;
+    max-width:380px; background:var(--border-soft); border:1px solid var(--border-soft);
     border-radius:var(--radius); overflow:hidden;
   }
   .ttt-cell{
     aspect-ratio:1; background:var(--bg-panel); border:none; cursor:pointer;
-    font-family:var(--mono-ui); font-size:28px; font-weight:700; color:var(--text);
+    font-family:var(--mono-ui); font-size:44px; font-weight:700; color:var(--text);
     display:flex; align-items:center; justify-content:center; padding:0;
     transition:background .15s ease;
   }
@@ -235,9 +235,9 @@
   .ttt-cell.x{ color:var(--accent-strong); }
   .ttt-cell.o{ color:var(--text-dim); }
   .ttt-cell.win{ background:var(--accent-soft); }
-  .ttt-status{ margin-top:14px; font-family:var(--mono-ui); font-size:13px; color:var(--text-dim); min-height:1.4em; }
+  .ttt-status{ margin-top:16px; font-family:var(--mono-ui); font-size:14px; color:var(--text-dim); min-height:1.4em; text-align:center; }
   .ttt-reset{
-    margin-top:10px; font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong);
+    display:block; margin:12px auto 0; font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong);
     background:var(--accent-soft); border:1px solid var(--accent); border-radius:2px; padding:6px 14px; cursor:pointer;
   }
   .ttt-reset:hover{ background:var(--accent); color:var(--bg); }
