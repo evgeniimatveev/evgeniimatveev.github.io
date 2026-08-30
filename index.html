@@ -218,6 +218,30 @@
   .log-text{ color:var(--text-dim); line-height:1.6; }
   .log-text b{ color:var(--text); font-weight:500; }
 
+  /* ---------- tic-tac-toe ---------- */
+  .ttt-board{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    max-width:240px; background:var(--border-soft); border:1px solid var(--border-soft);
+    border-radius:var(--radius); overflow:hidden;
+  }
+  .ttt-cell{
+    aspect-ratio:1; background:var(--bg-panel); border:none; cursor:pointer;
+    font-family:var(--mono-ui); font-size:28px; font-weight:700; color:var(--text);
+    display:flex; align-items:center; justify-content:center; padding:0;
+    transition:background .15s ease;
+  }
+  .ttt-cell:hover:not(:disabled){ background:var(--bg-panel-2); }
+  .ttt-cell:disabled{ cursor:default; }
+  .ttt-cell.x{ color:var(--accent-strong); }
+  .ttt-cell.o{ color:var(--text-dim); }
+  .ttt-cell.win{ background:var(--accent-soft); }
+  .ttt-status{ margin-top:14px; font-family:var(--mono-ui); font-size:13px; color:var(--text-dim); min-height:1.4em; }
+  .ttt-reset{
+    margin-top:10px; font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong);
+    background:var(--accent-soft); border:1px solid var(--accent); border-radius:2px; padding:6px 14px; cursor:pointer;
+  }
+  .ttt-reset:hover{ background:var(--accent); color:var(--bg); }
+
   /* ---------- footer ---------- */
   footer{ padding:40px 0 60px; border-top:1px solid var(--border-soft); margin-top:40px; }
   .contact-row{ display:flex; flex-wrap:wrap; gap:24px; font-family:var(--mono-ui); font-size:13.5px; margin-top:16px; }
@@ -543,6 +567,14 @@
     </div>
   </section>
 
+  <section id="game">
+    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">play tic-tac-toe</span></span><span class="cursor"></span></div>
+    <p class="stat-note">you're X, I'm O — fair warning: I play optimally here too.</p>
+    <div class="ttt-board" id="tttBoard" role="group" aria-label="Tic-tac-toe board"></div>
+    <div class="ttt-status" id="tttStatus">your move</div>
+    <button type="button" class="ttt-reset" id="tttReset">reset</button>
+  </section>
+
   <section id="buildlog">
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tail -f build.log</span></span><span class="cursor"></span></div>
     <p class="stat-note">auto-generated daily by a GitHub Action + Claude, summarizing real commits across the repos above — not hand-written</p>
@@ -849,5 +881,105 @@
         pos = (key === seq[0]) ? 1 : 0;
       }
     });
+  })();
+
+  // ---------- tic-tac-toe: minimax opponent, never loses ----------
+  (function initTicTacToe(){
+    var boardEl = document.getElementById('tttBoard');
+    var statusEl = document.getElementById('tttStatus');
+    var resetBtn = document.getElementById('tttReset');
+    if(!boardEl || !statusEl || !resetBtn) return;
+
+    var WIN_LINES = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    var board, over, winLine;
+
+    function checkWinner(b){
+      for(var i = 0; i < WIN_LINES.length; i++){
+        var line = WIN_LINES[i];
+        var a = b[line[0]], c = b[line[1]], d = b[line[2]];
+        if(a && a === c && a === d) return { winner: a, line: line };
+      }
+      if(b.every(function(v){ return v; })) return { winner: 'draw', line: null };
+      return null;
+    }
+
+    function minimax(b, player){
+      var result = checkWinner(b);
+      if(result){
+        if(result.winner === 'O') return { score: 1 };
+        if(result.winner === 'X') return { score: -1 };
+        return { score: 0 };
+      }
+      var moves = [];
+      for(var i = 0; i < 9; i++){
+        if(b[i]) continue;
+        var next = b.slice();
+        next[i] = player;
+        var outcome = minimax(next, player === 'O' ? 'X' : 'O');
+        moves.push({ index: i, score: outcome.score });
+      }
+      var best = moves[0];
+      moves.forEach(function(m){
+        if(player === 'O' ? m.score > best.score : m.score < best.score) best = m;
+      });
+      return best;
+    }
+
+    function render(){
+      boardEl.innerHTML = '';
+      board.forEach(function(v, i){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ttt-cell' + (v ? ' ' + v.toLowerCase() : '') + (winLine && winLine.indexOf(i) > -1 ? ' win' : '');
+        btn.textContent = v || '';
+        btn.disabled = !!v || over;
+        btn.setAttribute('aria-label', 'cell ' + (i + 1) + (v ? ', ' + v : ', empty'));
+        btn.addEventListener('click', function(idx){ return function(){ playerMove(idx); }; }(i));
+        boardEl.appendChild(btn);
+      });
+    }
+
+    function playerMove(i){
+      if(over || board[i]) return;
+      board[i] = 'X';
+      var result = checkWinner(board);
+      if(result){ finish(result); return; }
+      render();
+      statusEl.textContent = 'thinking…';
+      setTimeout(computerMove, 350);
+    }
+
+    function computerMove(){
+      var best = minimax(board, 'O');
+      board[best.index] = 'O';
+      var result = checkWinner(board);
+      if(result){ finish(result); return; }
+      render();
+      statusEl.textContent = 'your move';
+    }
+
+    function finish(result){
+      over = true;
+      winLine = result.line;
+      render();
+      if(result.winner === 'draw') statusEl.textContent = 'draw — solid play.';
+      else if(result.winner === 'X') statusEl.textContent = "you actually won?! that shouldn't be possible — email me, I need to know how.";
+      else statusEl.textContent = 'I win — optimal play, same as the routing solver. reset to try again.';
+    }
+
+    function reset(){
+      board = new Array(9).fill(null);
+      over = false;
+      winLine = null;
+      statusEl.textContent = 'your move';
+      render();
+    }
+
+    resetBtn.addEventListener('click', reset);
+    reset();
   })();
 </script>
