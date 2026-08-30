@@ -111,17 +111,26 @@
      the live chameleon hue so they read as sparks of the same color
      system, not a separate decoration. */
   .star-field{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  /* Each star reads the same live --accent-hue as the rest of the site,
+     but offset by its own --star-hue (set inline per star) — so a
+     cluster shows several different colors from the spectrum at once,
+     shimmering independently as the global hue keeps rotating, while
+     also drifting gently instead of sitting still. */
   .star{
-    position:absolute; width:3px; height:3px; border-radius:50%;
-    background:var(--accent-strong);
-    box-shadow:0 0 7px 1px var(--accent-soft), 0 0 2px 0 var(--accent-strong);
-    animation:twinkle 4s ease-in-out infinite;
+    position:absolute; width:4px; height:4px; border-radius:50%;
+    background:hsl(calc(var(--accent-hue) + var(--star-hue, 0)) 90% 72%);
+    box-shadow:0 0 9px 2px hsl(calc(var(--accent-hue) + var(--star-hue, 0)) 90% 72% / 0.55);
+    animation:star-drift 10s ease-in-out infinite;
+    animation-delay:var(--star-delay, 0s);
   }
-  @keyframes twinkle{
-    0%, 100%{ opacity:.15; transform:scale(.7); }
-    50%{ opacity:1; transform:scale(1.4); }
+  @keyframes star-drift{
+    0%   { transform:translate(0,0) scale(.8); opacity:.45; }
+    25%  { transform:translate(16px,-12px) scale(1.25); opacity:.95; }
+    50%  { transform:translate(-8px,-20px) scale(.9); opacity:.6; }
+    75%  { transform:translate(-18px,7px) scale(1.15); opacity:.9; }
+    100% { transform:translate(0,0) scale(.8); opacity:.45; }
   }
-  @media (prefers-reduced-motion: reduce){ .star{ animation:none; opacity:.6; } }
+  @media (prefers-reduced-motion: reduce){ .star{ animation:none; opacity:.7; } }
   .has-stars{ position:relative; }
 
   a{ color:var(--accent); text-decoration:none; border-bottom:1px solid transparent; }
@@ -419,10 +428,10 @@
 
   <section id="whoami" class="has-stars">
     <div class="star-field" aria-hidden="true">
-      <span class="star" style="top:6%; left:88%; animation-delay:0s;"></span>
-      <span class="star" style="top:32%; left:95%; animation-delay:1.3s;"></span>
-      <span class="star" style="top:58%; left:90%; animation-delay:2.6s;"></span>
-      <span class="star" style="top:80%; left:96%; animation-delay:.7s;"></span>
+      <span class="star" style="top:6%; left:88%; --star-hue:0; --star-delay:0s;"></span>
+      <span class="star" style="top:32%; left:95%; --star-hue:90; --star-delay:1.3s;"></span>
+      <span class="star" style="top:58%; left:90%; --star-hue:180; --star-delay:2.6s;"></span>
+      <span class="star" style="top:80%; left:96%; --star-hue:270; --star-delay:.7s;"></span>
     </div>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">whoami</span></span><span class="cursor"></span></div>
     <div class="whoami-name">evgeniimatveev</div>
@@ -671,10 +680,10 @@
 
   <section id="game" class="has-stars">
     <div class="star-field" aria-hidden="true">
-      <span class="star" style="top:4%; left:6%; animation-delay:.4s;"></span>
-      <span class="star" style="top:20%; left:92%; animation-delay:1.9s;"></span>
-      <span class="star" style="top:70%; left:4%; animation-delay:2.4s;"></span>
-      <span class="star" style="top:88%; left:90%; animation-delay:1s;"></span>
+      <span class="star" style="top:4%; left:6%; --star-hue:0; --star-delay:.4s;"></span>
+      <span class="star" style="top:20%; left:92%; --star-hue:90; --star-delay:1.9s;"></span>
+      <span class="star" style="top:70%; left:4%; --star-hue:180; --star-delay:2.4s;"></span>
+      <span class="star" style="top:88%; left:90%; --star-hue:270; --star-delay:1s;"></span>
     </div>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">play tic-tac-toe</span></span><span class="cursor"></span></div>
     <p class="ask-cta">Think you can outsmart me? You're X, I'm O — give it a shot.</p>
@@ -696,10 +705,10 @@
 
   <footer id="contact" class="has-stars">
     <div class="star-field" aria-hidden="true">
-      <span class="star" style="top:10%; left:80%; animation-delay:.2s;"></span>
-      <span class="star" style="top:40%; left:92%; animation-delay:2.1s;"></span>
-      <span class="star" style="top:60%; left:8%; animation-delay:1.5s;"></span>
-      <span class="star" style="top:85%; left:70%; animation-delay:3s;"></span>
+      <span class="star" style="top:10%; left:80%; --star-hue:0; --star-delay:.2s;"></span>
+      <span class="star" style="top:40%; left:92%; --star-hue:90; --star-delay:2.1s;"></span>
+      <span class="star" style="top:60%; left:8%; --star-hue:180; --star-delay:1.5s;"></span>
+      <span class="star" style="top:85%; left:70%; --star-hue:270; --star-delay:3s;"></span>
     </div>
     <div class="prompt" style="border-bottom:none; margin-bottom:0;"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
     <div class="contact-row">
