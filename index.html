@@ -121,16 +121,18 @@
     position:absolute; width:var(--star-size, 5px); height:var(--star-size, 5px); border-radius:50%;
     background:hsl(calc(var(--accent-hue) + var(--star-hue, 0)) 92% 74%);
     box-shadow:0 0 14px 3px hsl(calc(var(--accent-hue) + var(--star-hue, 0)) 92% 74% / 0.6);
-    animation:star-move var(--star-move-duration, 7s) ease-in-out infinite,
-              star-glow var(--star-duration, 23s) ease-in-out infinite;
+    animation-name:star-move, var(--glow-name, star-glow-blackout);
+    animation-duration:var(--star-move-duration, 7s), var(--star-duration, 23s);
+    animation-timing-function:ease-in-out, ease-in-out;
+    animation-iteration-count:infinite, infinite;
     animation-delay:var(--star-delay, 0s), var(--star-delay, 0s);
   }
   /* Position and brightness run as two separate animations (on the
      standalone `translate`/`scale` properties, not `transform`) so drift
      speed and the blackout timing don't fight each other on one
-     timeline: star-move loops fast and just wanders, star-glow is the
-     slow flare + 5-7s blackout cycle (see below) and layers scale on
-     top so the star visibly swells as it brightens. */
+     timeline: star-move loops fast and just wanders, the glow animation
+     is the slow flare + brief blackout cycle (see below) and layers
+     scale on top so the star visibly swells as it brightens. */
   @keyframes star-move{
     0%   { translate:0 0; }
     25%  { translate:16px -12px; }
@@ -138,24 +140,37 @@
     75%  { translate:-18px 7px; }
     100% { translate:0 0; }
   }
-  /* One full cycle = a hard flare up to full brightness, then a 5-7s
-     blackout (the star fully disappears) before it fades back in —
-     reads as an actual star twinkling out, not a decorative loop. The
-     blackout's share of the cycle is fixed (~25%), so varying
-     --star-duration per star (22-28s) keeps every star's dark stretch
-     inside 5-7s while staggering which stars are dark at any moment. */
-  @keyframes star-glow{
+  /* Two glow variants, picked per star via --glow-name so not every star
+     in a cluster goes dark at once — about half (odd ones) run the
+     blackout version, half (even ones) just dip low and stay visible.
+     Blackout span is a fixed ~10% of the cycle, so varying
+     --star-duration per star (22-28s) keeps the actual dark stretch a
+     brief 1-3s rather than a long fade. */
+  @keyframes star-glow-blackout{
     0%   { scale:.8; opacity:.45; filter:brightness(1); }
     8%   { scale:1.05; opacity:.75; }
     14%  { scale:1.4; opacity:1; filter:brightness(1.9); }
     20%  { scale:1.1; opacity:.85; filter:brightness(1); }
     32%  { scale:.9; opacity:.55; }
-    40%  { scale:.4; opacity:.12; }
-    46%  { scale:0; opacity:0; }
-    70%  { scale:0; opacity:0; }
-    76%  { scale:.5; opacity:.25; }
-    84%  { scale:1.15; opacity:.9; }
+    40%  { scale:.5; opacity:.2; }
+    44%  { scale:0; opacity:0; }
+    54%  { scale:0; opacity:0; }
+    60%  { scale:.5; opacity:.2; }
+    70%  { scale:.9; opacity:.55; }
+    82%  { scale:1.15; opacity:.9; }
     90%  { scale:1.35; opacity:1; filter:brightness(1.9); }
+    100% { scale:.8; opacity:.45; filter:brightness(1); }
+  }
+  @keyframes star-glow-soft{
+    0%   { scale:.8; opacity:.45; filter:brightness(1); }
+    10%  { scale:1.05; opacity:.75; }
+    16%  { scale:1.4; opacity:1; filter:brightness(1.9); }
+    24%  { scale:1.1; opacity:.85; filter:brightness(1); }
+    40%  { scale:.65; opacity:.4; }
+    50%  { scale:.6; opacity:.32; }
+    60%  { scale:.65; opacity:.4; }
+    76%  { scale:1.15; opacity:.9; }
+    88%  { scale:1.35; opacity:1; filter:brightness(1.9); }
     100% { scale:.8; opacity:.45; filter:brightness(1); }
   }
   /* A rare streak across the section — quick and bright, then long dark
@@ -492,9 +507,9 @@
     <h2 class="sr-only">About me</h2>
     <div class="star-field" aria-hidden="true">
       <span class="star" style="top:11%; left:62%; --star-hue:0; --star-size:6px; --star-delay:0s;"></span>
-      <span class="star" style="top:2%; left:83%; --star-hue:60; --star-size:8px; --star-delay:.8s;"></span>
+      <span class="star" style="top:2%; left:83%; --star-hue:60; --star-size:8px; --star-delay:.8s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:95%; left:71%; --star-hue:120; --star-size:5px; --star-delay:1.6s;"></span>
-      <span class="star" style="top:11%; left:35%; --star-hue:180; --star-size:9px; --star-delay:.3s;"></span>
+      <span class="star" style="top:11%; left:35%; --star-hue:180; --star-size:9px; --star-delay:.3s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:71%; left:65%; --star-hue:240; --star-size:7px; --star-delay:1.2s;"></span>
       <span class="shooting-star" style="top:98%; left:26%; animation-delay:0s;"></span>
     </div>
@@ -512,9 +527,9 @@
     <h2 class="sr-only">Ask me anything</h2>
     <div class="star-field" aria-hidden="true">
       <span class="star" style="top:14%; left:62%; --star-hue:0; --star-size:6px; --star-delay:.5s;"></span>
-      <span class="star" style="top:2%; left:95%; --star-hue:60; --star-size:9px; --star-delay:1.5s;"></span>
+      <span class="star" style="top:2%; left:95%; --star-hue:60; --star-size:9px; --star-delay:1.5s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:2%; left:11%; --star-hue:120; --star-size:5px; --star-delay:2.3s;"></span>
-      <span class="star" style="top:2%; left:50%; --star-hue:180; --star-size:8px; --star-delay:.2s;"></span>
+      <span class="star" style="top:2%; left:50%; --star-hue:180; --star-size:8px; --star-delay:.2s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:38%; left:86%; --star-hue:240; --star-size:6px; --star-delay:1s;"></span>
       <span class="shooting-star" style="top:5%; left:77%; animation-delay:5s;"></span>
     </div>
@@ -584,9 +599,9 @@
     <h2 class="sr-only">Projects</h2>
     <div class="star-field" aria-hidden="true">
       <span class="star" style="top:4%; left:8%; --star-hue:0; --star-size:6px; --star-delay:.4s; --star-duration:24s;"></span>
-      <span class="star" style="top:22%; left:92%; --star-hue:60; --star-size:8px; --star-delay:1.9s; --star-duration:27s;"></span>
+      <span class="star" style="top:22%; left:92%; --star-hue:60; --star-size:8px; --star-delay:1.9s; --star-duration:27s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:55%; left:3%; --star-hue:120; --star-size:5px; --star-delay:.9s; --star-duration:22s;"></span>
-      <span class="star" style="top:78%; left:96%; --star-hue:180; --star-size:9px; --star-delay:2.6s; --star-duration:26s;"></span>
+      <span class="star" style="top:78%; left:96%; --star-hue:180; --star-size:9px; --star-delay:2.6s; --star-duration:26s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:95%; left:50%; --star-hue:240; --star-size:6px; --star-delay:1.3s; --star-duration:23s;"></span>
       <span class="shooting-star" style="top:65%; left:85%; animation-delay:8s;"></span>
     </div>
@@ -756,9 +771,9 @@
     <h2 class="sr-only">Skills</h2>
     <div class="star-field" aria-hidden="true">
       <span class="star" style="top:14%; left:5%; --star-hue:0; --star-size:7px; --star-delay:.4s;"></span>
-      <span class="star" style="top:41%; left:68%; --star-hue:60; --star-size:5px; --star-delay:1.3s;"></span>
+      <span class="star" style="top:41%; left:68%; --star-hue:60; --star-size:5px; --star-delay:1.3s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:35%; left:95%; --star-hue:120; --star-size:9px; --star-delay:2.1s;"></span>
-      <span class="star" style="top:2%; left:20%; --star-hue:180; --star-size:6px; --star-delay:.9s;"></span>
+      <span class="star" style="top:2%; left:20%; --star-hue:180; --star-size:6px; --star-delay:.9s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:83%; left:86%; --star-hue:240; --star-size:8px; --star-delay:1.7s;"></span>
       <span class="shooting-star" style="top:53%; left:92%; animation-delay:10s;"></span>
     </div>
@@ -777,9 +792,9 @@
     <h2 class="sr-only">Play tic-tac-toe</h2>
     <div class="star-field" aria-hidden="true">
       <span class="star" style="top:2%; left:80%; --star-hue:0; --star-size:6px; --star-delay:.6s;"></span>
-      <span class="star" style="top:53%; left:20%; --star-hue:60; --star-size:9px; --star-delay:1.4s;"></span>
+      <span class="star" style="top:53%; left:20%; --star-hue:60; --star-size:9px; --star-delay:1.4s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:71%; left:5%; --star-hue:120; --star-size:5px; --star-delay:2.2s;"></span>
-      <span class="star" style="top:86%; left:80%; --star-hue:180; --star-size:7px; --star-delay:.3s;"></span>
+      <span class="star" style="top:86%; left:80%; --star-hue:180; --star-size:7px; --star-delay:.3s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:98%; left:11%; --star-hue:240; --star-size:8px; --star-delay:1.9s;"></span>
       <span class="shooting-star" style="top:38%; left:89%; animation-delay:15s;"></span>
     </div>
@@ -806,9 +821,9 @@
     <h2 class="sr-only">Contact</h2>
     <div class="star-field" aria-hidden="true">
       <span class="star" style="top:32%; left:71%; --star-hue:0; --star-size:6px; --star-delay:.5s;"></span>
-      <span class="star" style="top:65%; left:44%; --star-hue:60; --star-size:8px; --star-delay:1.6s;"></span>
+      <span class="star" style="top:65%; left:44%; --star-hue:60; --star-size:8px; --star-delay:1.6s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:26%; left:44%; --star-hue:120; --star-size:5px; --star-delay:2.4s;"></span>
-      <span class="star" style="top:71%; left:83%; --star-hue:180; --star-size:9px; --star-delay:.8s;"></span>
+      <span class="star" style="top:71%; left:83%; --star-hue:180; --star-size:9px; --star-delay:.8s; --glow-name:star-glow-soft;"></span>
       <span class="star" style="top:2%; left:20%; --star-hue:240; --star-size:7px; --star-delay:1.2s;"></span>
       <span class="shooting-star" style="top:5%; left:62%; animation-delay:20s;"></span>
     </div>
