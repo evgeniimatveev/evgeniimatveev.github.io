@@ -1,0 +1,80 @@
+name: Smoke Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate HTML (W3C Nu Checker)
+        run: |
+          curl -s -X POST "https://validator.w3.org/nu/?out=json" \
+            -H "Content-Type: text/html; charset=utf-8" \
+            -H "User-Agent: github-actions-smoke-test" \
+            --data-binary @index.html > vnu-result.json
+
+          python3 <<'PYEOF'
+          import json
+
+          def is_known_false_positive(msg):
+              # The Nu checker's bundled CSS validator predates the CSS
+              # Properties and Values API (@property) -- this project uses
+              # it deliberately (registers --accent-hue for the chameleon
+              # animation) and it is real, well-supported, valid CSS.
+              text = msg.get('message', '')
+              return 'Unrecognized at-rule' in text and '@property' in text
+
+          with open('vnu-result.json', encoding='utf-8') as f:
+              data = json.load(f)
+
+          messages = data.get('messages', [])
+          errors = [m for m in messages if m.get('type') == 'error' and not is_known_false_positive(m)]
+
+          for m in messages:
+              if m.get('type') != 'error':
+                  continue
+              tag = 'notice' if is_known_false_positive(m) else 'error'
+              print(f"::{tag} file=index.html,line={m.get('lastLine')}::{m.get('message')}")
+
+          if errors:
+              print(f'{len(errors)} real HTML error(s) found')
+              raise SystemExit(1)
+          print('HTML valid (ignoring the known @property false-positive)')
+          PYEOF
+
+      - name: Check required meta tags and sections are present
+        run: |
+          fail=0
+          check() {
+            if ! grep -qF "$1" index.html; then
+              echo "::error::Missing $2"
+              fail=1
+            fi
+          }
+          check '<html lang=' 'lang attribute on <html> (a11y)'
+          check '<meta name="description"' 'meta description (link-preview/SEO)'
+          check '<meta property="og:image"' 'og:image (link-preview)'
+          check '<meta property="og:title"' 'og:title (link-preview)'
+          check 'rel="icon"' 'favicon'
+          check '<h1' 'an <h1> heading'
+          check '<section id="ask"' '#ask section'
+          check '<section id="game"' '#game section'
+          check '<footer id="contact"' '#contact footer'
+          exit $fail
+
+      - name: Check assets referenced from index.html exist in the repo
+        run: |
+          fail=0
+          for f in og-image.png; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Referenced asset missing from repo: $f"
+              fail=1
+            fi
+          done
+          exit $fail
