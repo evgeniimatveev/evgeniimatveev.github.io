@@ -247,6 +247,13 @@
   .ask-box{ border:1px solid var(--border-soft); border-radius:var(--radius); background:var(--bg-panel); padding:14px 16px; }
   .ask-log{ display:flex; flex-direction:column; gap:12px; margin-bottom:10px; max-height:420px; overflow-y:auto; }
   .ask-log:empty{ display:none; }
+  .ask-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .ask-chip{
+    font-family:var(--mono-ui); font-size:11.5px; color:var(--accent-strong);
+    background:var(--accent-soft); border:1px solid var(--accent); border-radius:14px;
+    padding:5px 12px; cursor:pointer; transition:background .15s ease, color .15s ease;
+  }
+  .ask-chip:hover, .ask-chip:focus-visible{ background:var(--accent); color:var(--bg); }
   .ask-q{ font-family:var(--mono-ui); font-size:13px; color:var(--accent-strong); }
   .ask-q b{ color:var(--text-faint); font-weight:500; margin-right:6px; }
   .ask-a{ font-size:13.5px; color:var(--text-dim); line-height:1.6; padding-left:14px; border-left:2px solid var(--border); white-space:pre-wrap; }
@@ -297,6 +304,11 @@
     <p class="stat-note">answers in your language, pulled from 300+ real facts — 33 repos, incident postmortems, interview stories — via Vectorize + Workers AI, generated live by Claude (Haiku 4.5)</p>
     <div class="ask-box">
       <div id="ask-log" class="ask-log"></div>
+      <div id="ask-chips" class="ask-chips">
+        <button type="button" class="ask-chip">What's a real incident you debugged?</button>
+        <button type="button" class="ask-chip">Why are you job searching?</button>
+        <button type="button" class="ask-chip">What's your dbt / SQL experience?</button>
+      </div>
       <form id="ask-form" class="ask-form">
         <span class="ask-prompt-sym">&gt;</span>
         <input id="ask-input" class="ask-input" type="text" maxlength="220" autocomplete="off" placeholder="e.g. what's your experience with dbt?" />
@@ -621,6 +633,7 @@
     var askInput = document.getElementById('ask-input');
     var askLog = document.getElementById('ask-log');
     var askHint = document.getElementById('ask-hint');
+    var askChips = document.getElementById('ask-chips');
     if(!askForm || !askInput || !askLog) return;
     var askSubmit = askForm.querySelector('.ask-submit');
     var askedCount = 0;
@@ -629,11 +642,8 @@
       askHint.textContent = 'ask is warming up — email works meanwhile: evgeniimatveevusa@gmail.com';
     }
 
-    askForm.addEventListener('submit', function(e){
-      e.preventDefault();
-      var q = askInput.value.trim();
+    function sendQuestion(q){
       if(!q) return;
-
       if(!ASK_ENDPOINT){
         askHint.textContent = 'ask isn\'t connected yet — email works meanwhile: evgeniimatveevusa@gmail.com';
         return;
@@ -643,6 +653,7 @@
         return;
       }
       askedCount++;
+      if(askChips) askChips.style.display = 'none';
       askInput.value = '';
       askInput.disabled = true;
       askSubmit.disabled = true;
@@ -687,7 +698,52 @@
         askInput.focus();
         askLog.scrollTop = askLog.scrollHeight;
       });
+    }
+
+    askForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      sendQuestion(askInput.value.trim());
     });
+
+    if(askChips){
+      askChips.addEventListener('click', function(e){
+        var chip = e.target.closest('.ask-chip');
+        if(!chip) return;
+        sendQuestion(chip.textContent.trim());
+      });
+    }
+
+    // Idle-state placeholder types out a rotating set of real example
+    // questions instead of sitting on one static example forever — pauses
+    // the moment the visitor focuses or types, so it never fights them.
+    if(!reduceMotion){
+      var EXAMPLES = [
+        "what's your experience with dbt?",
+        'tell me about a real production incident',
+        'why are you job searching?',
+        "what's your SQL & Tableau background?",
+        'how do you keep 9 apps alive on a free tier?'
+      ];
+      var exIndex = 0, charIndex = 0, deleting = false;
+      (function typeStep(){
+        if(document.activeElement === askInput || askInput.value){
+          setTimeout(typeStep, 400);
+          return;
+        }
+        var full = 'e.g. ' + EXAMPLES[exIndex];
+        if(!deleting){
+          charIndex++;
+          askInput.placeholder = full.slice(0, charIndex);
+          if(charIndex >= full.length){ deleting = true; setTimeout(typeStep, 1600); return; }
+          setTimeout(typeStep, 45);
+        } else {
+          charIndex--;
+          askInput.placeholder = full.slice(0, charIndex);
+          if(charIndex <= 0){ deleting = false; exIndex = (exIndex + 1) % EXAMPLES.length; setTimeout(typeStep, 400); return; }
+          setTimeout(typeStep, 25);
+        }
+      })();
+    }
   })();
 
   // ---------- build.log (AI changelog) ----------
