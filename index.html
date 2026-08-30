@@ -336,17 +336,17 @@
   .ttt-mode:hover{ border-color:var(--accent-strong); }
   .ttt-mode.active{ color:var(--accent-strong); background:var(--accent-soft); border-color:var(--accent); }
   .ttt-board{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin:0 auto;
-    max-width:380px; background:var(--border-soft); border:1px solid var(--border-soft);
+    display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin:0 auto;
+    max-width:380px; background:var(--border); border:1px solid var(--border);
     border-radius:var(--radius); overflow:hidden;
   }
   .ttt-cell{
-    aspect-ratio:1; background:var(--bg-panel); border:none; cursor:pointer;
+    aspect-ratio:1; background:var(--bg-panel-2); border:none; cursor:pointer;
     font-family:var(--mono-ui); font-size:44px; font-weight:700; color:var(--text);
     display:flex; align-items:center; justify-content:center; padding:0;
     transition:background .15s ease;
   }
-  .ttt-cell:hover:not(:disabled){ background:var(--bg-panel-2); }
+  .ttt-cell:hover:not(:disabled){ background:var(--accent-soft); }
   .ttt-cell:disabled{ cursor:default; }
   .ttt-cell.x{ color:var(--accent-strong); }
   .ttt-cell.o{ color:var(--text-dim); }
