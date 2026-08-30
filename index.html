@@ -28,9 +28,9 @@
        below reading var(--accent)/--accent-strong/--accent-soft shifts
        together, in lockstep, rather than drifting out of sync. */
     --accent-hue:    30;
-    --accent:        hsl(var(--accent-hue) 82% 67%);
-    --accent-strong: hsl(var(--accent-hue) 100% 77%);
-    --accent-soft:   hsl(var(--accent-hue) 82% 67% / 0.12);
+    --accent:        hsl(var(--accent-hue) 90% 68%);
+    --accent-strong: hsl(var(--accent-hue) 100% 78%);
+    --accent-soft:   hsl(var(--accent-hue) 90% 68% / 0.16);
     --ok:            #6FCF8E;
     --ok-soft:       rgba(111,207,142,0.12);
     --warn:          #E8C34D;
@@ -92,6 +92,23 @@
     background:hsl(calc(var(--accent-hue) + 40) 80% 55% / 0.05);
   }
   ::selection{ background:var(--accent-soft); color:var(--accent-strong); }
+
+  /* Small twinkling star clusters, scattered in a few sections — pick up
+     the live chameleon hue so they read as sparks of the same color
+     system, not a separate decoration. */
+  .star-field{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .star{
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:var(--accent-strong);
+    box-shadow:0 0 7px 1px var(--accent-soft), 0 0 2px 0 var(--accent-strong);
+    animation:twinkle 4s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity:.15; transform:scale(.7); }
+    50%{ opacity:1; transform:scale(1.4); }
+  }
+  @media (prefers-reduced-motion: reduce){ .star{ animation:none; opacity:.6; } }
+  .has-stars{ position:relative; }
 
   a{ color:var(--accent); text-decoration:none; border-bottom:1px solid transparent; }
   a:hover, a:focus-visible{ border-bottom-color:var(--accent); }
@@ -386,7 +403,13 @@
 
 <main class="wrap">
 
-  <section id="whoami">
+  <section id="whoami" class="has-stars">
+    <div class="star-field" aria-hidden="true">
+      <span class="star" style="top:6%; left:88%; animation-delay:0s;"></span>
+      <span class="star" style="top:32%; left:95%; animation-delay:1.3s;"></span>
+      <span class="star" style="top:58%; left:90%; animation-delay:2.6s;"></span>
+      <span class="star" style="top:80%; left:96%; animation-delay:.7s;"></span>
+    </div>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">whoami</span></span><span class="cursor"></span></div>
     <div class="whoami-name">evgeniimatveev</div>
     <div class="whoami-role">Analytics &amp; MLOps Engineer</div>
@@ -632,7 +655,13 @@
     </div>
   </section>
 
-  <section id="game">
+  <section id="game" class="has-stars">
+    <div class="star-field" aria-hidden="true">
+      <span class="star" style="top:4%; left:6%; animation-delay:.4s;"></span>
+      <span class="star" style="top:20%; left:92%; animation-delay:1.9s;"></span>
+      <span class="star" style="top:70%; left:4%; animation-delay:2.4s;"></span>
+      <span class="star" style="top:88%; left:90%; animation-delay:1s;"></span>
+    </div>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">play tic-tac-toe</span></span><span class="cursor"></span></div>
     <p class="ask-cta">Think you can outsmart me? You're X, I'm O — give it a shot.</p>
     <span class="ask-badge">★ minimax opponent — plays optimally, never loses</span>
@@ -651,7 +680,13 @@
     <div id="buildlog-list" class="status-list"></div>
   </section>
 
-  <footer id="contact">
+  <footer id="contact" class="has-stars">
+    <div class="star-field" aria-hidden="true">
+      <span class="star" style="top:10%; left:80%; animation-delay:.2s;"></span>
+      <span class="star" style="top:40%; left:92%; animation-delay:2.1s;"></span>
+      <span class="star" style="top:60%; left:8%; animation-delay:1.5s;"></span>
+      <span class="star" style="top:85%; left:70%; animation-delay:3s;"></span>
+    </div>
     <div class="prompt" style="border-bottom:none; margin-bottom:0;"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
     <div class="contact-row">
       <a href="https://github.com/evgeniimatveev" target="_blank" rel="noopener">github.com/evgeniimatveev ↗</a>
