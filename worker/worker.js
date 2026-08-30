@@ -7,6 +7,7 @@ const ALLOWED_ORIGIN = "https://evgeniimatveev.github.io";
 const IP_DAILY_LIMIT = 10;
 const GLOBAL_DAILY_LIMIT = 250;
 const KV_TTL_SECONDS = 172800; // 2 days — safe buffer past the UTC day boundary
+const TOTAL_KEY = "total:questions"; // no TTL — running counter since this key was introduced
 
 const EMBEDDING_MODEL = "@cf/baai/bge-m3";
 const TOP_K = 6;
@@ -19,7 +20,7 @@ Core facts always true: Analytics & MLOps Engineer, based in Burbank, CA, active
 function corsHeaders(origin) {
   return {
     "Access-Control-Allow-Origin": origin === ALLOWED_ORIGIN ? origin : "null",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key",
     "Vary": "Origin",
   };
@@ -68,8 +69,10 @@ async function handleAsk(request, env, ctx, cors) {
 
   const ipCountStr = await env.RATE_LIMIT.get(ipKey);
   const globalCountStr = await env.RATE_LIMIT.get(globalKey);
+  const totalCountStr = await env.RATE_LIMIT.get(TOTAL_KEY);
   const ipCount = parseInt(ipCountStr || "0", 10);
   const globalCount = parseInt(globalCountStr || "0", 10);
+  const totalCount = parseInt(totalCountStr || "0", 10);
 
   if (ipCount >= IP_DAILY_LIMIT) {
     return json({ error: "rate_limited", scope: "ip" }, 429, cors);
@@ -137,14 +140,23 @@ async function handleAsk(request, env, ctx, cors) {
     .join("")
     .trim();
 
+  const newTotal = totalCount + 1;
   ctx.waitUntil(
     Promise.all([
       env.RATE_LIMIT.put(ipKey, String(ipCount + 1), { expirationTtl: KV_TTL_SECONDS }),
       env.RATE_LIMIT.put(globalKey, String(globalCount + 1), { expirationTtl: KV_TTL_SECONDS }),
+      env.RATE_LIMIT.put(TOTAL_KEY, String(newTotal)), // no TTL — persists indefinitely
     ])
   );
 
-  return json({ answer }, 200, cors);
+  return json({ answer, total: newTotal }, 200, cors);
+}
+
+// Public, unauthenticated, read-only — just the running "questions answered"
+// counter so the frontend can show it without spending a rate-limited ask.
+async function handleStats(env, cors) {
+  const totalStr = await env.RATE_LIMIT.get(TOTAL_KEY);
+  return json({ total: parseInt(totalStr || "0", 10) }, 200, cors);
 }
 
 // One-off / re-runnable ingestion endpoint. Protected by ADMIN_KEY (a secret this
@@ -222,6 +234,12 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: cors });
+    }
+    if (request.method === "GET" && url.pathname === "/stats") {
+      if (origin !== ALLOWED_ORIGIN) {
+        return json({ error: "forbidden" }, 403, cors);
+      }
+      return handleStats(env, cors);
     }
     if (request.method !== "POST") {
       return json({ error: "method_not_allowed" }, 405, cors);

@@ -445,6 +445,28 @@
   .ask-submit:hover{ background:var(--accent); color:var(--bg); }
   .ask-submit:disabled{ opacity:.5; cursor:not-allowed; }
   .ask-hint{ margin-top:10px; font-size:11px; color:var(--text-faint); font-family:var(--mono-ui); }
+  .ask-counter{
+    display:flex; align-items:center; gap:7px; margin:-4px 0 16px;
+    font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong);
+    font-variant-numeric:tabular-nums; opacity:0; transition:opacity .4s ease;
+  }
+  .ask-counter.is-visible{ opacity:1; }
+  .ask-counter .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--accent);
+    box-shadow:0 0 6px var(--accent-soft); flex-shrink:0; animation:pulse 2.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .ask-counter .dot{ animation:none; } }
+
+  /* ---------- interactive skills tree ---------- */
+  .tree-layer{ cursor:default; border-radius:2px; transition:background .15s ease; }
+  .tree-layer .layer-detail{
+    display:block; max-height:0; overflow:hidden; opacity:0; color:var(--text-faint); font-size:12px;
+    padding-left:22px; transition:max-height .25s ease, opacity .2s ease, margin .25s ease;
+  }
+  .tree-layer:hover, .tree-layer:focus-visible{ background:var(--accent-soft); outline:none; }
+  .tree-layer:hover .layer-detail, .tree-layer:focus-visible .layer-detail{
+    max-height:2.6em; opacity:1; margin-top:2px;
+  }
 </style>
 
 <div class="term-titlebar">
@@ -510,6 +532,7 @@
     <p class="ask-cta">Ask anything you need to know — my stack, a real incident, why I'm job searching, logistics. Grounded in my real work, not scripted.</p>
     <span class="ask-badge">★ ask in any language — RAG-grounded, not a chatbot script</span>
     <p class="stat-note">answers in your language, pulled from 300+ real facts — 33 repos, incident postmortems, interview stories — via Vectorize + Workers AI, generated live by Claude (Haiku 4.5)</p>
+    <p class="ask-counter" id="askCounter"><span class="dot"></span><span id="askCounterText">loading question count…</span></p>
     <div class="ask-box">
       <div id="ask-log" class="ask-log"></div>
       <div id="ask-chips" class="ask-chips">
@@ -535,17 +558,17 @@
     <div class="stat-grid">
       <div class="stat-tile">
         <div class="stat-label">apps live</div>
-        <div class="stat-value ok">9<span style="color:var(--text-faint); font-size:16px;">/9</span></div>
+        <div class="stat-value ok"><span class="count-num" data-count-to="9">0</span><span style="color:var(--text-faint); font-size:16px;">/9</span></div>
         <div class="stat-sub">Streamlit Cloud + HF Spaces</div>
       </div>
       <div class="stat-tile">
         <div class="stat-label">last 24h uptime</div>
-        <div class="stat-value ok">100%</div>
+        <div class="stat-value ok"><span class="count-num" data-count-to="100">0</span>%</div>
         <div class="stat-sub">tracked via UptimeRobot</div>
       </div>
       <div class="stat-tile">
         <div class="stat-label">keepalive</div>
-        <div class="stat-value">2</div>
+        <div class="stat-value"><span class="count-num" data-count-to="2">0</span></div>
         <div class="stat-sub">Playwright /30min · curl /1hr</div>
       </div>
       <div class="stat-tile">
@@ -760,12 +783,12 @@
     </div>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tree skills/</span></span><span class="cursor"></span></div>
     <div class="tree">
-      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">collect</span> <span class="items">— Python · REST APIs · Kaggle datasets · web scraping</span></div>
-      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">store</span> &nbsp;&nbsp;&nbsp;<span class="items">— PostgreSQL · DuckDB · MotherDuck · Snowflake · Supabase</span></div>
-      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">transform</span><span class="items">— dbt · pandas · SQL (window functions, CTEs)</span></div>
-      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">model</span> &nbsp;&nbsp;<span class="items">— OR-Tools · MLflow · Weights &amp; Biases · XGBoost / CatBoost / LightGBM</span></div>
-      <div class="tree-layer"><span class="branch">├──</span> <span class="layer-name">serve</span> &nbsp;&nbsp;<span class="items">— Streamlit · FastAPI · Plotly · pydeck</span></div>
-      <div class="tree-layer"><span class="branch">└──</span> <span class="layer-name">operate</span> &nbsp;<span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span></div>
+      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">collect</span> <span class="items">— Python · REST APIs · Kaggle datasets · web scraping</span><span class="layer-detail">e.g. job-market-pulse pulls 100+ Adzuna API calls/day · weather-pipeline hits 20 cities across 6 continents twice daily</span></div>
+      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">store</span> &nbsp;&nbsp;&nbsp;<span class="items">— PostgreSQL · DuckDB · MotherDuck · Snowflake · Supabase</span><span class="layer-detail">e.g. so-survey-analytics loads 65K dev responses into DuckDB · uber-driver-analytics runs on PostgreSQL</span></div>
+      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">transform</span><span class="items">— dbt · pandas · SQL (window functions, CTEs)</span><span class="layer-detail">e.g. olist-e-commerce-analytics — 13 dbt models, 54 tests, over 100K+ marketplace orders</span></div>
+      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">model</span> &nbsp;&nbsp;<span class="items">— OR-Tools · MLflow · Weights &amp; Biases · XGBoost / CatBoost / LightGBM</span><span class="layer-detail">e.g. route-optimization-vrp's OR-Tools solver · cv-logistics-mlops tracked via MLflow + W&amp;B</span></div>
+      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">serve</span> &nbsp;&nbsp;<span class="items">— Streamlit · FastAPI · Plotly · pydeck</span><span class="layer-detail">e.g. every live app above runs on Streamlit · mcp-data-quality-agent exposes 19 tools as an MCP server</span></div>
+      <div class="tree-layer" tabindex="0"><span class="branch">└──</span> <span class="layer-name">operate</span> &nbsp;<span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span><span class="layer-detail">e.g. all 9 live apps sit behind GitHub Actions CI + UptimeRobot alerting with email/SMS/voice</span></div>
     </div>
   </section>
 
@@ -897,6 +920,7 @@
   // TODO: set this to the deployed Cloudflare Worker URL, e.g.
   // 'https://evgeniimatveev-ask.<your-subdomain>.workers.dev'
   var ASK_ENDPOINT = 'https://evgeniimatveev-ask.evgeniimatveevusa.workers.dev/';
+  var ASK_STATS_ENDPOINT = ASK_ENDPOINT.replace(/\/$/, '') + '/stats';
   var ASK_MAX_PER_VISIT = 6;
 
   (function initAsk(){
@@ -905,9 +929,32 @@
     var askLog = document.getElementById('ask-log');
     var askHint = document.getElementById('ask-hint');
     var askChips = document.getElementById('ask-chips');
+    var askCounter = document.getElementById('askCounter');
+    var askCounterText = document.getElementById('askCounterText');
     if(!askForm || !askInput || !askLog) return;
     var askSubmit = askForm.querySelector('.ask-submit');
     var askedCount = 0;
+    var shownTotal = 0;
+
+    function showAskCounter(total){
+      if(!askCounterText || typeof total !== 'number') return;
+      var from = shownTotal;
+      shownTotal = total;
+      if(typeof animateCount === 'function'){
+        animateCount(from, total, 700, function(n){
+          askCounterText.textContent = n.toLocaleString() + ' question' + (n === 1 ? '' : 's') + ' answered so far';
+        });
+      } else {
+        askCounterText.textContent = total.toLocaleString() + ' questions answered so far';
+      }
+      if(askCounter) askCounter.classList.add('is-visible');
+    }
+
+    if(ASK_ENDPOINT){
+      fetch(ASK_STATS_ENDPOINT).then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(data){ if(data && typeof data.total === 'number') showAskCounter(data.total); })
+        .catch(function(){});
+    }
 
     if(!ASK_ENDPOINT){
       askHint.textContent = 'ask is warming up — email works meanwhile: evgeniimatveevusa@gmail.com';
@@ -952,6 +999,7 @@
         aEl.classList.remove('pending');
         if(result.ok && result.data && result.data.answer){
           aEl.textContent = result.data.answer;
+          if(typeof result.data.total === 'number') showAskCounter(result.data.total);
         } else if(result.data && result.data.error === 'rate_limited'){
           aEl.classList.add('err');
           aEl.textContent = 'rate limit hit — try again tomorrow, or just email me.';
@@ -1284,5 +1332,69 @@
       setActive(visible[0].target);
     }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
     targets.forEach(function(el){ if(el) observer.observe(el); });
+  })();
+
+  // ---------- shared count-up tween, used by stat-grid numbers and the ask counter ----------
+  function animateCount(from, to, duration, onFrame){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      onFrame(to);
+      return;
+    }
+    var start = null;
+    function step(ts){
+      if(start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      onFrame(Math.round(from + (to - from) * eased));
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ---------- stat-grid numbers count up from 0 the first time they scroll into view ----------
+  (function initStatCountUp(){
+    var nums = Array.prototype.slice.call(document.querySelectorAll('.count-num[data-count-to]'));
+    if(!nums.length) return;
+    if(!('IntersectionObserver' in window)){
+      nums.forEach(function(el){ el.textContent = el.getAttribute('data-count-to'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(!entry.isIntersecting) return;
+        var el = entry.target;
+        io.unobserve(el);
+        var to = parseInt(el.getAttribute('data-count-to'), 10) || 0;
+        animateCount(0, to, 900, function(n){ el.textContent = n; });
+      });
+    }, { threshold: 0.6 });
+    nums.forEach(function(el){ io.observe(el); });
+  })();
+
+  // ---------- stars drift toward the cursor slightly for a bit of parallax depth ----------
+  (function initStarParallax(){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var fields = Array.prototype.slice.call(document.querySelectorAll('.star-field'));
+    if(!fields.length) return;
+    var MAX_SHIFT = 10;
+    var targetX = 0, targetY = 0, curX = 0, curY = 0, ticking = false;
+
+    function render(){
+      curX += (targetX - curX) * 0.08;
+      curY += (targetY - curY) * 0.08;
+      var t = 'translate(' + curX.toFixed(1) + 'px,' + curY.toFixed(1) + 'px)';
+      fields.forEach(function(f){ f.style.transform = t; });
+      if(Math.abs(targetX - curX) > 0.05 || Math.abs(targetY - curY) > 0.05){
+        requestAnimationFrame(render);
+      } else {
+        ticking = false;
+      }
+    }
+
+    window.addEventListener('mousemove', function(e){
+      targetX = (e.clientX / window.innerWidth - 0.5) * MAX_SHIFT * -2;
+      targetY = (e.clientY / window.innerHeight - 0.5) * MAX_SHIFT * -2;
+      if(!ticking){ ticking = true; requestAnimationFrame(render); }
+    }, { passive: true });
   })();
 </script>
