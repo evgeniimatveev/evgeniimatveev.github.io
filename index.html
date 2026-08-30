@@ -121,15 +121,28 @@
     position:absolute; width:var(--star-size, 5px); height:var(--star-size, 5px); border-radius:50%;
     background:hsl(calc(var(--accent-hue) + var(--star-hue, 0)) 92% 74%);
     box-shadow:0 0 14px 3px hsl(calc(var(--accent-hue) + var(--star-hue, 0)) 92% 74% / 0.6);
-    animation:star-drift 10s ease-in-out infinite;
+    animation:star-drift var(--star-duration, 23s) ease-in-out infinite;
     animation-delay:var(--star-delay, 0s);
   }
+  /* One full cycle = drift + a hard flare up to full brightness, then a
+     5-7s blackout (the star fully disappears) before it fades back in —
+     reads as an actual star twinkling out, not a decorative loop. The
+     blackout's share of the cycle is fixed (~25%), so varying
+     --star-duration per star (22-28s) keeps every star's dark stretch
+     inside 5-7s while staggering which stars are dark at any moment. */
   @keyframes star-drift{
-    0%   { transform:translate(0,0) scale(.8); opacity:.45; }
-    25%  { transform:translate(16px,-12px) scale(1.25); opacity:.95; }
-    50%  { transform:translate(-8px,-20px) scale(.9); opacity:.6; }
-    75%  { transform:translate(-18px,7px) scale(1.15); opacity:.9; }
-    100% { transform:translate(0,0) scale(.8); opacity:.45; }
+    0%   { transform:translate(0,0) scale(.8); opacity:.45; filter:brightness(1); }
+    8%   { transform:translate(10px,-8px) scale(1.05); opacity:.75; }
+    14%  { transform:translate(14px,-10px) scale(1.4); opacity:1; filter:brightness(1.9); }
+    20%  { transform:translate(16px,-12px) scale(1.1); opacity:.85; filter:brightness(1); }
+    32%  { transform:translate(-8px,-20px) scale(.9); opacity:.55; }
+    40%  { transform:translate(-10px,-21px) scale(.4); opacity:.12; }
+    46%  { transform:translate(-10px,-21px) scale(0); opacity:0; }
+    70%  { transform:translate(-10px,-21px) scale(0); opacity:0; }
+    76%  { transform:translate(-14px,-8px) scale(.5); opacity:.25; }
+    84%  { transform:translate(-18px,7px) scale(1.15); opacity:.9; }
+    90%  { transform:translate(-10px,4px) scale(1.35); opacity:1; filter:brightness(1.9); }
+    100% { transform:translate(0,0) scale(.8); opacity:.45; filter:brightness(1); }
   }
   /* A rare streak across the section — quick and bright, then long dark
      silence before it repeats, like an actual shooting star rather than
@@ -553,8 +566,16 @@
     </div>
   </section>
 
-  <section id="projects">
+  <section id="projects" class="has-stars">
     <h2 class="sr-only">Projects</h2>
+    <div class="star-field" aria-hidden="true">
+      <span class="star" style="top:4%; left:8%; --star-hue:0; --star-size:6px; --star-delay:.4s; --star-duration:24s;"></span>
+      <span class="star" style="top:22%; left:92%; --star-hue:60; --star-size:8px; --star-delay:1.9s; --star-duration:27s;"></span>
+      <span class="star" style="top:55%; left:3%; --star-hue:120; --star-size:5px; --star-delay:.9s; --star-duration:22s;"></span>
+      <span class="star" style="top:78%; left:96%; --star-hue:180; --star-size:9px; --star-delay:2.6s; --star-duration:26s;"></span>
+      <span class="star" style="top:95%; left:50%; --star-hue:240; --star-size:6px; --star-delay:1.3s; --star-duration:23s;"></span>
+      <span class="shooting-star" style="top:65%; left:85%; animation-delay:8s;"></span>
+    </div>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ls projects/ --sort=impact -la</span></span><span class="cursor"></span></div>
     <div class="project-grid">
 
