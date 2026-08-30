@@ -250,6 +250,32 @@
   }
   .ttt-reset:hover{ background:var(--accent); color:var(--bg); }
 
+  /* ---------- section nav (scroll-spy dots) ---------- */
+  .section-nav{
+    position:fixed; right:22px; top:50%; transform:translateY(-50%); z-index:15;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .section-dot{
+    position:relative; width:8px; height:8px; padding:6px; margin:-6px;
+    background:none; border:none; cursor:pointer;
+  }
+  .section-dot::before{
+    content:""; display:block; width:8px; height:8px; border-radius:50%;
+    background:var(--border); transition:background .2s ease, transform .2s ease;
+  }
+  .section-dot:hover::before{ background:var(--text-dim); }
+  .section-dot.active::before{ background:var(--accent); transform:scale(1.35); }
+  .section-dot-label{
+    position:absolute; right:100%; top:50%; transform:translateY(-50%);
+    margin-right:12px; padding:3px 9px; white-space:nowrap;
+    font-family:var(--mono-ui); font-size:11px; color:var(--text-dim);
+    background:var(--bg-panel); border:1px solid var(--border-soft); border-radius:2px;
+    opacity:0; pointer-events:none; transition:opacity .15s ease;
+  }
+  .section-dot:hover .section-dot-label{ opacity:1; }
+  .section-dot.active .section-dot-label{ color:var(--accent-strong); }
+  @media (max-width:1000px){ .section-nav{ display:none; } }
+
   /* ---------- footer ---------- */
   footer{ padding:40px 0 60px; border-top:1px solid var(--border-soft); margin-top:40px; }
   .contact-row{ display:flex; flex-wrap:wrap; gap:24px; font-family:var(--mono-ui); font-size:13.5px; margin-top:16px; }
@@ -326,6 +352,19 @@
   <div class="boot-line" style="animation-delay:.05s">Last login: $(date) on ttys000</div>
   <div class="boot-line" style="animation-delay:.15s">connecting to <span class="ok">production</span>… <span class="ok">ok</span></div>
 </div>
+
+<nav class="section-nav" id="sectionNav" aria-label="Section navigation">
+  <button type="button" class="section-dot" data-target="#whoami" aria-label="whoami"><span class="section-dot-label">whoami</span></button>
+  <button type="button" class="section-dot" data-target="#ask" aria-label="ask --live"><span class="section-dot-label">ask --live</span></button>
+  <button type="button" class="section-dot" data-target="#status" aria-label="status"><span class="section-dot-label">status</span></button>
+  <button type="button" class="section-dot" data-target="#projects" aria-label="projects"><span class="section-dot-label">projects</span></button>
+  <button type="button" class="section-dot" data-target="#cases" aria-label="postmortems"><span class="section-dot-label">postmortems</span></button>
+  <button type="button" class="section-dot" data-target="#infra" aria-label="infra.log"><span class="section-dot-label">infra.log</span></button>
+  <button type="button" class="section-dot" data-target="#skills" aria-label="skills"><span class="section-dot-label">skills</span></button>
+  <button type="button" class="section-dot" data-target="#game" aria-label="play"><span class="section-dot-label">play</span></button>
+  <button type="button" class="section-dot" data-target="#buildlog" aria-label="build.log"><span class="section-dot-label">build.log</span></button>
+  <button type="button" class="section-dot" data-target="#contact" aria-label="contact"><span class="section-dot-label">contact</span></button>
+</nav>
 
 <main class="wrap">
 
@@ -594,7 +633,7 @@
     <div id="buildlog-list" class="status-list"></div>
   </section>
 
-  <footer>
+  <footer id="contact">
     <div class="prompt" style="border-bottom:none; margin-bottom:0;"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
     <div class="contact-row">
       <a href="https://github.com/evgeniimatveev" target="_blank" rel="noopener">github.com/evgeniimatveev ↗</a>
@@ -1021,5 +1060,55 @@
     }
 
     reset();
+  })();
+
+  // ---------- section nav: scroll-spy dots ----------
+  (function initSectionNav(){
+    var nav = document.getElementById('sectionNav');
+    if(!nav) return;
+    var dots = Array.prototype.slice.call(nav.querySelectorAll('.section-dot'));
+    var targets = dots.map(function(dot){
+      return document.querySelector(dot.dataset.target);
+    });
+
+    // Element.scrollIntoView({behavior:'smooth'}) silently no-ops on this
+    // page — a known Chromium interaction with a position:sticky header in
+    // the scroll path — and even with instant behavior it would tuck the
+    // section's top edge directly under the sticky titlebar. Compute the
+    // offset manually and drive window.scrollTo instead, which animates
+    // smoothly with no such issue.
+    var titlebar = document.querySelector('.term-titlebar');
+    function scrollToTarget(el){
+      if(!el) return;
+      var offset = (titlebar ? titlebar.offsetHeight : 0) + 16;
+      var top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+
+    dots.forEach(function(dot){
+      dot.addEventListener('click', function(){
+        scrollToTarget(document.querySelector(dot.dataset.target));
+      });
+    });
+
+    if(!('IntersectionObserver' in window)) return;
+    var current = null;
+    function setActive(el){
+      if(el === current) return;
+      current = el;
+      dots.forEach(function(dot, i){
+        dot.classList.toggle('active', targets[i] === el);
+      });
+    }
+    var observer = new IntersectionObserver(function(entries){
+      // Pick whichever observed section is closest to the top of the
+      // viewport among those currently intersecting — more stable while
+      // scrolling than "first entry to fire" (IO doesn't guarantee order).
+      var visible = entries.filter(function(e){ return e.isIntersecting; });
+      if(!visible.length) return;
+      visible.sort(function(a, b){ return a.boundingClientRect.top - b.boundingClientRect.top; });
+      setActive(visible[0].target);
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    targets.forEach(function(el){ if(el) observer.observe(el); });
   })();
 </script>
