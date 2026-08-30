@@ -51,6 +51,17 @@
     :root{ animation:none; }
   }
 
+  /* Konami-code easter egg: briefly speeds the chameleon way up. */
+  :root.konami{ animation-duration: 1.4s; }
+  .egg-toast{
+    position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-8px);
+    font-family:var(--mono-ui); font-size:12.5px; color:var(--accent-strong);
+    background:#08090c; border:1px solid var(--accent); border-radius:20px;
+    padding:8px 16px; opacity:0; transition:opacity .3s ease, transform .3s ease;
+    z-index:50; pointer-events:none; box-shadow:0 0 20px -2px var(--accent-soft);
+  }
+  .egg-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
   *{ box-sizing:border-box; }
   html{ color-scheme: dark; }
   body{
@@ -797,6 +808,44 @@
     var away = 'come back? :(';
     document.addEventListener('visibilitychange', function(){
       document.title = document.hidden ? away : original;
+    });
+  })();
+
+  // ---------- konami code: briefly supercharges the chameleon ----------
+  (function initKonami(){
+    var seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    var pos = 0;
+    var resetTimer = null;
+
+    function showToast(text){
+      var el = document.createElement('div');
+      el.className = 'egg-toast';
+      el.textContent = text;
+      document.body.appendChild(el);
+      requestAnimationFrame(function(){ el.classList.add('show'); });
+      setTimeout(function(){
+        el.classList.remove('show');
+        setTimeout(function(){ el.remove(); }, 400);
+      }, 2600);
+    }
+
+    function trigger(){
+      document.documentElement.classList.add('konami');
+      showToast('🦎 chameleon mode: engaged');
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(function(){
+        document.documentElement.classList.remove('konami');
+      }, 5000);
+    }
+
+    document.addEventListener('keydown', function(e){
+      var key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if(key === seq[pos]){
+        pos++;
+        if(pos === seq.length){ pos = 0; trigger(); }
+      } else {
+        pos = (key === seq[0]) ? 1 : 0;
+      }
     });
   })();
 </script>
