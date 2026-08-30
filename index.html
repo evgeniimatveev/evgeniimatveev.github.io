@@ -38,16 +38,14 @@
     --radius:        3px;
     --mono-ui:       'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
     --mono-body:     'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-    animation: chameleon 22s ease-in-out infinite;
+    animation: chameleon 26s linear infinite;
   }
 
-  /* Amber -> wine -> violet -> wine -> amber. Deliberately stays in the
-     warm-to-violet band (never crosses green/cyan/blue) so it always reads
-     as "the same site, breathing" rather than a random-hue rainbow. */
+  /* Full spectrum sweep, one direction, seamless loop: amber -> gold ->
+     green -> cyan -> blue -> violet -> magenta -> red -> back to amber. */
   @keyframes chameleon{
-    0%, 100% { --accent-hue: 30; }
-    35%      { --accent-hue: -25; }
-    70%      { --accent-hue: -75; }
+    0%   { --accent-hue: 30; }
+    100% { --accent-hue: 390; }
   }
   @media (prefers-reduced-motion: reduce){
     :root{ animation:none; }
