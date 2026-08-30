@@ -219,6 +219,14 @@
   .log-text b{ color:var(--text); font-weight:500; }
 
   /* ---------- tic-tac-toe ---------- */
+  .ttt-modes{ display:flex; gap:8px; justify-content:center; margin-bottom:14px; }
+  .ttt-mode{
+    font-family:var(--mono-ui); font-size:11.5px; color:var(--text-dim);
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:14px;
+    padding:5px 12px; cursor:pointer; transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .ttt-mode:hover{ border-color:var(--accent-strong); }
+  .ttt-mode.active{ color:var(--accent-strong); background:var(--accent-soft); border-color:var(--accent); }
   .ttt-board{
     display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin:0 auto;
     max-width:380px; background:var(--border-soft); border:1px solid var(--border-soft);
@@ -571,6 +579,10 @@
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">play tic-tac-toe</span></span><span class="cursor"></span></div>
     <p class="ask-cta">Think you can outsmart me? You're X, I'm O — give it a shot.</p>
     <span class="ask-badge">★ minimax opponent — plays optimally, never loses</span>
+    <div class="ttt-modes" id="tttModes">
+      <button type="button" class="ttt-mode active" data-first="you">you go first</button>
+      <button type="button" class="ttt-mode" data-first="bot">I go first</button>
+    </div>
     <div class="ttt-board" id="tttBoard" role="group" aria-label="Tic-tac-toe board"></div>
     <div class="ttt-status" id="tttStatus">your move</div>
     <button type="button" class="ttt-reset" id="tttReset">reset</button>
@@ -891,6 +903,7 @@
     var boardEl = document.getElementById('tttBoard');
     var statusEl = document.getElementById('tttStatus');
     var resetBtn = document.getElementById('tttReset');
+    var modesEl = document.getElementById('tttModes');
     if(!boardEl || !statusEl || !resetBtn) return;
 
     var WIN_LINES = [
@@ -898,7 +911,7 @@
       [0,3,6],[1,4,7],[2,5,8],
       [0,4,8],[2,4,6]
     ];
-    var board, over, winLine;
+    var board, over, winLine, turn, botFirst = false;
 
     function checkWinner(b){
       for(var i = 0; i < WIN_LINES.length; i++){
@@ -939,7 +952,7 @@
         btn.type = 'button';
         btn.className = 'ttt-cell' + (v ? ' ' + v.toLowerCase() : '') + (winLine && winLine.indexOf(i) > -1 ? ' win' : '');
         btn.textContent = v || '';
-        btn.disabled = !!v || over;
+        btn.disabled = !!v || over || turn !== 'X';
         btn.setAttribute('aria-label', 'cell ' + (i + 1) + (v ? ', ' + v : ', empty'));
         btn.addEventListener('click', function(idx){ return function(){ playerMove(idx); }; }(i));
         boardEl.appendChild(btn);
@@ -947,8 +960,9 @@
     }
 
     function playerMove(i){
-      if(over || board[i]) return;
+      if(over || turn !== 'X' || board[i]) return;
       board[i] = 'X';
+      turn = 'O';
       var result = checkWinner(board);
       if(result){ finish(result); return; }
       render();
@@ -957,8 +971,10 @@
     }
 
     function computerMove(){
+      if(over || turn !== 'O') return;
       var best = minimax(board, 'O');
       board[best.index] = 'O';
+      turn = 'X';
       var result = checkWinner(board);
       if(result){ finish(result); return; }
       render();
@@ -978,11 +994,32 @@
       board = new Array(9).fill(null);
       over = false;
       winLine = null;
-      statusEl.textContent = 'your move';
+      turn = botFirst ? 'O' : 'X';
       render();
+      if(botFirst){
+        statusEl.textContent = 'thinking…';
+        setTimeout(computerMove, 350);
+      } else {
+        statusEl.textContent = 'your move';
+      }
     }
 
     resetBtn.addEventListener('click', reset);
+
+    if(modesEl){
+      modesEl.addEventListener('click', function(e){
+        var btn = e.target.closest('.ttt-mode');
+        if(!btn) return;
+        var wantsBotFirst = btn.dataset.first === 'bot';
+        if(wantsBotFirst === botFirst) return;
+        botFirst = wantsBotFirst;
+        Array.prototype.forEach.call(modesEl.querySelectorAll('.ttt-mode'), function(b){
+          b.classList.toggle('active', b === btn);
+        });
+        reset();
+      });
+    }
+
     reset();
   })();
 </script>
