@@ -1,6 +1,18 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>evgeniimatveev</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  /* Registered so the browser can smoothly tween --accent-hue frame-by-frame
+     instead of jumping between keyframe stops — required for the ambient
+     "chameleon" drift below to read as a glow shifting, not a color flicker. */
+  @property --accent-hue{
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 30;
+  }
 
   :root{
     --bg:            #0B0D12;
@@ -11,9 +23,14 @@
     --text:          #DBE1EC;
     --text-dim:      #8892A4;
     --text-faint:    #545C6E;
-    --accent:        #F0A868;
-    --accent-strong: #FFC98C;
-    --accent-soft:   rgba(240,168,104,0.12);
+    /* Accent is hue-driven, not a fixed hex, so the whole site's amber
+       identity can breathe through wine/violet and back — every element
+       below reading var(--accent)/--accent-strong/--accent-soft shifts
+       together, in lockstep, rather than drifting out of sync. */
+    --accent-hue:    30;
+    --accent:        hsl(var(--accent-hue) 82% 67%);
+    --accent-strong: hsl(var(--accent-hue) 100% 77%);
+    --accent-soft:   hsl(var(--accent-hue) 82% 67% / 0.12);
     --ok:            #6FCF8E;
     --ok-soft:       rgba(111,207,142,0.12);
     --warn:          #E8C34D;
@@ -21,6 +38,19 @@
     --radius:        3px;
     --mono-ui:       'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
     --mono-body:     'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    animation: chameleon 22s ease-in-out infinite;
+  }
+
+  /* Amber -> wine -> violet -> wine -> amber. Deliberately stays in the
+     warm-to-violet band (never crosses green/cyan/blue) so it always reads
+     as "the same site, breathing" rather than a random-hue rainbow. */
+  @keyframes chameleon{
+    0%, 100% { --accent-hue: 30; }
+    35%      { --accent-hue: -25; }
+    70%      { --accent-hue: -75; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    :root{ animation:none; }
   }
 
   *{ box-sizing:border-box; }
@@ -68,6 +98,11 @@
   .term-clock{
     font-family:var(--mono-ui); font-size:12px; color:var(--text-faint);
     font-variant-numeric:tabular-nums; min-width:64px; text-align:right; flex-shrink:0;
+  }
+  .term-progress{
+    font-family:var(--mono-ui); font-size:12px; color:var(--accent);
+    font-variant-numeric:tabular-nums; min-width:132px; text-align:right; flex-shrink:0;
+    letter-spacing:.01em;
   }
 
   /* ---------- boot ---------- */
@@ -182,6 +217,7 @@
   @media (max-width:600px){
     section{ padding:40px 0 4px; }
     .term-path{ display:none; }
+    .term-progress{ display:none; }
   }
 
   /* ---------- ask widget ---------- */
@@ -233,6 +269,7 @@
   <div class="term-titlebar-inner">
     <div class="dots"><span></span><span></span><span></span></div>
     <div class="term-path"><b>evgeniimatveev</b> — zsh — 96×36</div>
+    <div class="term-progress" id="scrollProgress" aria-hidden="true">[░░░░░░░░░░░░░░░] 0%</div>
     <div class="term-clock" id="clock">--:--:--</div>
   </div>
 </div>
@@ -673,5 +710,39 @@
       .catch(function(){
         el.innerHTML = '<div class="status-row"><span class="status-name" style="color:var(--text-faint)">build.log unavailable</span></div>';
       });
+  })();
+
+  // ---------- scroll progress, rendered as a terminal-style bar in the titlebar ----------
+  (function initScrollProgress(){
+    var el = document.getElementById('scrollProgress');
+    if(!el) return;
+    var BAR_LEN = 15;
+    var ticking = false;
+    function render(){
+      ticking = false;
+      // No <!DOCTYPE html> on this page => quirks mode, where
+      // document.documentElement doesn't reliably report scroll size;
+      // scrollingElement resolves to the right element either way.
+      var doc = document.scrollingElement || document.documentElement;
+      var scrollable = doc.scrollHeight - doc.clientHeight;
+      var pct = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+      var filled = Math.round(pct * BAR_LEN);
+      var bar = '█'.repeat(filled) + '░'.repeat(BAR_LEN - filled);
+      el.textContent = '[' + bar + '] ' + Math.round(pct * 100) + '%';
+    }
+    window.addEventListener('scroll', function(){
+      if(!ticking){ ticking = true; requestAnimationFrame(render); }
+    }, { passive: true });
+    render();
+  })();
+
+  // ---------- tab-title easter egg: notice when a visitor tabs away ----------
+  (function initTabTitleEgg(){
+    if(document.hidden === undefined) return;
+    var original = document.title;
+    var away = 'come back? :(';
+    document.addEventListener('visibilitychange', function(){
+      document.title = document.hidden ? away : original;
+    });
   })();
 </script>
