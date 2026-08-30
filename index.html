@@ -590,7 +590,7 @@
       <a href="https://www.datascienceportfol.io/evgeniimatveevusa" target="_blank" rel="noopener">datascienceportfol.io ↗</a>
       <a href="mailto:evgeniimatveevusa@gmail.com">evgeniimatveevusa@gmail.com</a>
     </div>
-    <div class="foot-note">built with Claude Code · deployed on GitHub Pages · last rebuilt 2026-08-18</div>
+    <div class="foot-note">built with Claude Code · deployed on GitHub Pages · last commit <span id="footDate">see build.log above</span></div>
   </footer>
 
 </main>
@@ -806,6 +806,8 @@
         el.innerHTML = entries.map(function(e){
           return '<div class="status-row"><span class="status-host" style="width:80px;flex-shrink:0;">' + escapeHtml(e.date) + '</span><span class="status-name">' + escapeHtml(e.summary) + '</span></div>';
         }).join('');
+        var footDate = document.getElementById('footDate');
+        if(footDate && entries[0] && entries[0].date) footDate.textContent = entries[0].date;
       })
       .catch(function(){
         el.innerHTML = '<div class="status-row"><span class="status-name" style="color:var(--text-faint)">build.log unavailable</span></div>';
