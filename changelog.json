@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-08-30",
+    "summary": "Shipped portfolio overhaul: interactive tic-tac-toe, animated stars, ask widget, scroll-spy nav, SEO meta tags; optimized VRP cold-start, fixed Streamlit wakeup."
+  },
+  {
     "date": "2026-08-29",
     "summary": "Market pulse report automated for 2026-08-28, portfolio changelog updated."
   },
