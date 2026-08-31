@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-08-31",
+    "summary": "Replaced portfolio tic-tac-toe demo with live VRP solver; added response-time sparklines, dynamic counters, and ambient visual polish."
+  },
+  {
     "date": "2026-08-30",
     "summary": "Shipped portfolio overhaul: interactive tic-tac-toe, animated stars, ask widget, scroll-spy nav, SEO meta tags; optimized VRP cold-start, fixed Streamlit wakeup."
   },
