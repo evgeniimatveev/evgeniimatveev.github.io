@@ -15,14 +15,42 @@ const URLS = [
   "https://ljtn7jxeawyetzefthttnc.streamlit.app",
 ];
 
+// A plain HTTP 200 doesn't mean the app is actually awake — Streamlit
+// serves the "this app has gone to sleep" splash page with a 200 too, so
+// checking status alone (the original version of this function) reports
+// false "OK"s forever once an app falls asleep. Mirrors the fix already
+// applied to the GitHub Actions ping.js in layoffs-tracker/.github/
+// workflows/keepalive.yml (2026-08-30) — same wake-button detection,
+// ported from Playwright's getByRole to plain DOM text matching since
+// this Worker runs on @cloudflare/puppeteer instead.
 async function pingOne(browser, url) {
   const page = await browser.newPage();
   try {
-    const res = await page.goto(url, { waitUntil: "load", timeout: 20000 });
+    const res = await page.goto(url, { waitUntil: "load", timeout: 35000 });
     await new Promise((r) => setTimeout(r, 1500));
-    return `OK  ${url} -> HTTP ${res.status()}`;
+
+    const clicked = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll("button")).find((b) =>
+        /get this app back up/i.test(b.textContent || "")
+      );
+      if (!btn) return false;
+      btn.click();
+      return true;
+    });
+
+    if (!clicked) return `OK           ${url} -> HTTP ${res.status()}`;
+
+    await new Promise((r) => setTimeout(r, 20000));
+    const stillAsleep = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("button")).some((b) =>
+        /get this app back up/i.test(b.textContent || "")
+      )
+    );
+    return stillAsleep
+      ? `STILL ASLEEP ${url} (may need another run)`
+      : `ASLEEP->WOKE ${url}`;
   } catch (e) {
-    return `ERR ${url} -> ${String(e.message || e).split("\n")[0]}`;
+    return `ERR          ${url} -> ${String(e.message || e).split("\n")[0]}`;
   } finally {
     await page.close();
   }
