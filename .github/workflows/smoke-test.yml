@@ -64,7 +64,7 @@ jobs:
           check 'rel="icon"' 'favicon'
           check '<h1' 'an <h1> heading'
           check '<section id="ask"' '#ask section'
-          check '<section id="game"' '#game section'
+          check 'id="vrpDemo"' 'interactive VRP route-building demo'
           check '<footer id="contact"' '#contact footer'
           exit $fail
 

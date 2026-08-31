@@ -217,6 +217,9 @@
   .status-name{ font-family:var(--mono-ui); color:var(--text); flex:1; }
   .status-pill{ font-family:var(--mono-ui); font-size:10.5px; letter-spacing:.06em; color:var(--ok); background:var(--ok-soft); padding:2px 8px; border-radius:2px; }
   .status-host{ color:var(--text-faint); font-size:11px; }
+  .status-spark{ display:inline-flex; align-items:center; width:56px; height:16px; flex-shrink:0; }
+  .status-spark svg{ width:100%; height:100%; display:block; }
+  @media (max-width:600px){ .status-spark{ display:none; } }
 
   /* ---------- project grid ---------- */
   .project-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
@@ -241,6 +244,18 @@
   .case-field .k{ font-family:var(--mono-ui); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:4px; }
   .case-field .v{ font-size:13.5px; color:var(--text-dim); max-width:70ch; line-height:1.6; }
   .case-field.incident .v{ color:var(--text); }
+  .diff-details{ margin-top:10px; }
+  .diff-details summary{ cursor:pointer; font-family:var(--mono-ui); font-size:11.5px; color:var(--accent-strong); list-style:none; }
+  .diff-details summary::-webkit-details-marker{ display:none; }
+  .diff-details summary::before{ content:'▸ '; }
+  .diff-details[open] summary::before{ content:'▾ '; }
+  .diff-block{
+    margin:8px 0 0; padding:12px 14px; background:var(--bg-panel-2); border:1px solid var(--border-soft);
+    border-radius:var(--radius); overflow-x:auto; font-family:var(--mono-ui); font-size:11.5px;
+    line-height:1.65; color:var(--text-dim); white-space:pre;
+  }
+  .diff-add{ display:block; color:var(--ok); background:rgba(111,207,142,0.08); }
+  .diff-del{ display:block; color:var(--critical); background:rgba(226,104,107,0.08); }
   .case-result{ margin-top:16px; display:flex; flex-wrap:wrap; gap:8px 22px; padding-top:14px; border-top:1px solid var(--border-soft); }
   .case-result span{ font-family:var(--mono-ui); font-size:12.5px; color:var(--ok); }
   .case-result b{ color:var(--text); font-weight:700; }
@@ -259,37 +274,54 @@
   .log-text{ color:var(--text-dim); line-height:1.6; }
   .log-text b{ color:var(--text); font-weight:500; }
 
-  /* ---------- tic-tac-toe ---------- */
-  .ttt-modes{ display:flex; gap:8px; justify-content:center; margin-bottom:14px; }
-  .ttt-mode{
+  /* ---------- vrp mini-demo (inside the route-optimization-vrp case study) ---------- */
+  .vrp-demo{ margin-top:18px; padding-top:16px; border-top:1px solid var(--border-soft); }
+  .vrp-solve-note{ font-family:var(--mono-ui); font-size:11px; color:var(--text-faint); margin:0 0 12px; }
+  .vrp-solve-note b{ color:var(--accent-strong); font-weight:600; }
+  .vrp-controls{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
+  .vrp-controls .vrp-label{ font-family:var(--mono-ui); font-size:11px; color:var(--text-faint); margin-right:2px; }
+  .vrp-count{
     font-family:var(--mono-ui); font-size:11.5px; color:var(--text-dim);
     background:var(--bg-panel); border:1px solid var(--border); border-radius:14px;
     padding:5px 12px; cursor:pointer; transition:background .15s ease, color .15s ease, border-color .15s ease;
   }
-  .ttt-mode:hover{ border-color:var(--accent-strong); }
-  .ttt-mode.active{ color:var(--accent-strong); background:var(--accent-soft); border-color:var(--accent); }
-  .ttt-board{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin:0 auto;
-    max-width:380px; background:var(--accent); border:3px solid var(--accent);
-    border-radius:var(--radius); overflow:hidden;
-  }
-  .ttt-cell{
-    aspect-ratio:1; background:var(--bg-panel-2); border:none; cursor:pointer;
-    font-family:var(--mono-ui); font-size:44px; font-weight:700; color:var(--text);
-    display:flex; align-items:center; justify-content:center; padding:0;
-    transition:background .15s ease;
-  }
-  .ttt-cell:hover:not(:disabled){ background:var(--accent-soft); }
-  .ttt-cell:disabled{ cursor:default; }
-  .ttt-cell.x{ color:var(--accent-strong); }
-  .ttt-cell.o{ color:var(--text-dim); }
-  .ttt-cell.win{ background:var(--accent-soft); }
-  .ttt-status{ margin-top:16px; font-family:var(--mono-ui); font-size:14px; color:var(--text-dim); min-height:1.4em; text-align:center; }
-  .ttt-reset{
-    display:block; margin:12px auto 0; font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong);
+  .vrp-count:hover{ border-color:var(--accent-strong); }
+  .vrp-count.active{ color:var(--accent-strong); background:var(--accent-soft); border-color:var(--accent); }
+  .vrp-shuffle, .vrp-reset{
+    margin-left:auto; font-family:var(--mono-ui); font-size:12px; color:var(--accent-strong);
     background:var(--accent-soft); border:1px solid var(--accent); border-radius:2px; padding:6px 14px; cursor:pointer;
   }
-  .ttt-reset:hover{ background:var(--accent); color:var(--bg); }
+  .vrp-reset{ margin-left:0; color:var(--text-dim); background:var(--bg-panel); border-color:var(--border); }
+  .vrp-shuffle:hover{ background:var(--accent); color:var(--bg); }
+  .vrp-reset:hover{ border-color:var(--accent-strong); color:var(--text); }
+  .vrp-svg-wrap{
+    background:var(--bg-panel-2); border:1px solid var(--border-soft); border-radius:var(--radius);
+    padding:8px; max-width:640px; margin:0 auto;
+  }
+  .vrp-svg-wrap svg{ display:block; width:100%; height:auto; }
+  .vrp-stop{ cursor:pointer; }
+  .vrp-stop circle{ fill:var(--bg-panel); stroke:var(--text-dim); stroke-width:1.5; transition:fill .15s ease, stroke .15s ease; }
+  .vrp-stop:hover circle, .vrp-stop:focus-visible circle{ stroke:var(--accent-strong); }
+  .vrp-stop.visited circle{ fill:var(--accent-soft); stroke:var(--accent); }
+  .vrp-stop text{ font-family:var(--mono-ui); font-size:10px; fill:var(--text-dim); pointer-events:none; user-select:none; }
+  .vrp-stop.visited text{ fill:var(--accent-strong); }
+  .vrp-depot rect{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5; }
+  .vrp-depot text{ font-family:var(--mono-ui); font-size:9px; fill:var(--accent-strong); font-weight:700; }
+  .vrp-user-path{ fill:none; stroke:var(--accent-strong); stroke-width:2; stroke-linejoin:round; }
+  .vrp-nn-path{ fill:none; stroke:var(--text-faint); stroke-width:1.5; stroke-dasharray:4 3; opacity:.6; }
+  .vrp-opt-path{ fill:none; stroke:var(--ok); stroke-width:1.5; stroke-dasharray:2 3; opacity:.7; }
+  .vrp-status{ margin-top:12px; font-family:var(--mono-ui); font-size:13px; color:var(--text-dim); text-align:center; min-height:1.4em; }
+  .vrp-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:8px; font-family:var(--mono-ui); font-size:10.5px; color:var(--text-faint); }
+  .vrp-legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .vrp-legend i{ width:14px; height:0; border-top:2px solid var(--text-dim); display:inline-block; }
+  .vrp-legend .l-user i{ border-color:var(--accent-strong); }
+  .vrp-legend .l-nn i{ border-color:var(--text-faint); border-top-style:dashed; }
+  .vrp-legend .l-opt i{ border-color:var(--ok); border-top-style:dotted; }
+  .vrp-result{ margin-top:14px; display:flex; flex-wrap:wrap; gap:8px 22px; padding-top:14px; border-top:1px solid var(--border-soft); justify-content:center; }
+  .vrp-result span{ font-family:var(--mono-ui); font-size:12.5px; color:var(--text-dim); }
+  .vrp-result b{ color:var(--text); font-weight:700; }
+  .vrp-result .win{ color:var(--ok); }
+  .vrp-legend[hidden], .vrp-result[hidden]{ display:none; }
 
   /* ---------- section nav (scroll-spy dots) ---------- */
   .section-nav{
@@ -424,7 +456,6 @@
   <button type="button" class="section-dot" data-target="#cases" aria-label="postmortems"><span class="section-dot-label">postmortems</span></button>
   <button type="button" class="section-dot" data-target="#infra" aria-label="infra.log"><span class="section-dot-label">infra.log</span></button>
   <button type="button" class="section-dot" data-target="#skills" aria-label="skills"><span class="section-dot-label">skills</span></button>
-  <button type="button" class="section-dot" data-target="#game" aria-label="play"><span class="section-dot-label">play</span></button>
   <button type="button" class="section-dot" data-target="#buildlog" aria-label="build.log"><span class="section-dot-label">build.log</span></button>
   <button type="button" class="section-dot" data-target="#contact" aria-label="contact"><span class="section-dot-label">contact</span></button>
 </nav>
@@ -496,15 +527,15 @@
     </div>
 
     <div class="status-list">
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">route-optimization-vrp</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">crypto-onchain-dashboard</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">tech-layoffs-tracker</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">so-survey-analytics</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">weather-pipeline</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">interview-coach</span><span class="status-host">streamlit.app</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">job-market-pulse</span><span class="status-host">hf.space</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">olist-e-commerce-analytics</span><span class="status-host">hf.space</span><span class="status-pill">UP</span></div>
-      <div class="status-row"><span class="status-dot"></span><span class="status-name">uber-driver-analytics</span><span class="status-host">hf.space</span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="route-optimization-vrp"><span class="status-dot"></span><span class="status-name">route-optimization-vrp</span><span class="status-host">streamlit.app</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="crypto-onchain-dashboard"><span class="status-dot"></span><span class="status-name">crypto-onchain-dashboard</span><span class="status-host">streamlit.app</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="tech-layoffs-tracker"><span class="status-dot"></span><span class="status-name">tech-layoffs-tracker</span><span class="status-host">streamlit.app</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="so-survey-analytics"><span class="status-dot"></span><span class="status-name">so-survey-analytics</span><span class="status-host">streamlit.app</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="weather-pipeline"><span class="status-dot"></span><span class="status-name">weather-pipeline</span><span class="status-host">streamlit.app</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="interview-coach"><span class="status-dot"></span><span class="status-name">interview-coach</span><span class="status-host">streamlit.app</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="job-market-pulse"><span class="status-dot"></span><span class="status-name">job-market-pulse</span><span class="status-host">hf.space</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="olist-e-commerce-analytics"><span class="status-dot"></span><span class="status-name">olist-e-commerce-analytics</span><span class="status-host">hf.space</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
+      <div class="status-row" data-app="uber-driver-analytics"><span class="status-dot"></span><span class="status-name">uber-driver-analytics</span><span class="status-host">hf.space</span><span class="status-spark"></span><span class="status-pill">UP</span></div>
     </div>
   </section>
 
@@ -616,11 +647,46 @@
       <div class="flow">45 stops<span class="arrow">→</span>haversine distance matrix<span class="arrow">→</span>capacity + time-window dimensions<span class="arrow">→</span>guided local search<span class="arrow">→</span>route plan</div>
       <div class="case-field"><span class="k">problem</span><div class="v">A naive nearest-neighbor dispatcher missed 40 of 45 delivery windows — it drives to the closest stop with no awareness of promised time slots.</div></div>
       <div class="case-field"><span class="k">approach</span><div class="v">Capacitated VRP with time windows via Google OR-Tools: a haversine distance matrix, a capacity dimension and a separate time dimension with per-stop windows, disjunction-with-penalty so infeasible configs still return a partial plan instead of failing outright.</div></div>
-      <div class="case-field incident"><span class="k">incident — 2026-08-18</span><div class="v">The app was crashing in production with an <code>AttributeError</code>. Traced it to one line: <code>search_parameters.num_search_workers = 1</code> — a field that simply doesn't exist on the classic routing solver's <code>RoutingSearchParameters</code> proto in the pinned OR-Tools version (it belongs to CP-SAT's params, not this solver). Confirmed by enumerating the live proto's actual fields rather than trusting the earlier assumption, removed the line, verified the fix live within the hour.</div></div>
+      <div class="case-field incident"><span class="k">incident — 2026-08-18</span><div class="v">The app was crashing in production with an <code>AttributeError</code>. Traced it to one line: <code>search_parameters.num_search_workers = 1</code> — a field that simply doesn't exist on the classic routing solver's <code>RoutingSearchParameters</code> proto in the pinned OR-Tools version (it belongs to CP-SAT's params, not this solver). Confirmed by enumerating the live proto's actual fields rather than trusting the earlier assumption, removed the line, verified the fix live within the hour.
+        <details class="diff-details">
+          <summary>src/cvrp_solver.py · commit a921d99 · view the real diff</summary>
+          <pre class="diff-block"><code>@@ -149,12 +149,6 @@ def solve_cvrp(cvrp_input: CVRPInput, time_limit_s: int = 15) -&gt; CVRPResult:
+     routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+ )
+ search_parameters.time_limit.FromSeconds(time_limit_s)
+<span class="diff-del">-    # Force single-threaded search — OR-Tools otherwise auto-detects CPU count</span><span class="diff-del">-    # and runs that many parallel search workers, each holding its own solver</span><span class="diff-del">-    # state. Streamlit Cloud's free tier caps the container around ~1GB RAM,</span><span class="diff-del">-    # so multi-worker search on a multi-vCPU box was the likely cause of the</span><span class="diff-del">-    # native "Segmentation fault" crashes seen in production (2026-08-17).</span><span class="diff-del">-    search_parameters.num_search_workers = 1</span>
+
+ solution = routing.SolveWithParameters(search_parameters)</code></pre>
+        </details>
+      </div></div>
       <div class="case-result">
         <span><b>18.7%</b> distance saved</span>
         <span><b>100%</b> vs <b>11%</b> on-time</span>
         <span><b>~$82/day</b> saved</span>
+      </div>
+
+      <div class="vrp-demo" id="vrpDemo">
+        <p class="ask-cta">Build your own route — click the stops in the order you'd drive them, then see how it stacks up against a real optimizer.</p>
+        <span class="ask-badge">★ optimal route solved live via exact dynamic programming — not a canned answer</span>
+        <p class="vrp-solve-note" id="vrpSolveNote"></p>
+        <div class="vrp-controls">
+          <span class="vrp-label">stops</span>
+          <button type="button" class="vrp-count" data-n="10">10</button>
+          <button type="button" class="vrp-count active" data-n="12">12</button>
+          <button type="button" class="vrp-count" data-n="15">15</button>
+          <button type="button" class="vrp-reset" id="vrpReset">retry layout</button>
+          <button type="button" class="vrp-shuffle" id="vrpShuffle">new layout ↻</button>
+        </div>
+        <div class="vrp-svg-wrap">
+          <svg id="vrpSvg" viewBox="0 0 600 320" role="img" aria-label="Interactive route-building map"></svg>
+        </div>
+        <div class="vrp-status" id="vrpStatus">click a stop to start your route</div>
+        <div class="vrp-legend" id="vrpLegend" hidden>
+          <span class="l-user"><i></i>your route</span>
+          <span class="l-nn"><i></i>nearest-neighbor</span>
+          <span class="l-opt"><i></i>optimal (exact DP)</span>
+        </div>
+        <div class="vrp-result" id="vrpResult" hidden></div>
       </div>
     </div>
 
@@ -664,7 +730,7 @@
     </div>
     <div class="log-line">
       <div class="log-tag">MONITORING</div>
-      <div class="log-text">All <b>9 live apps</b> sit behind UptimeRobot with email/SMS/voice alerting. The last two were added the same day a "fix" for an intermittent crash turned it into a guaranteed one — the app was broken and live for hours before anyone noticed by hand.</div>
+      <div class="log-text">All <b>9 live apps</b> sit behind UptimeRobot with email/SMS/voice alerting. The last two were added the same day a "fix" for an intermittent crash turned it into a guaranteed one — the app was broken and live for hours before anyone noticed by hand. The response-time sparklines above are pulled from UptimeRobot's API on a schedule, not hand-typed — see <code>scripts/generate-uptime.mjs</code>.</div>
     </div>
     <div class="log-line">
       <div class="log-tag">CI/CD</div>
@@ -683,20 +749,6 @@
       <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">serve</span> &nbsp;&nbsp;<span class="items">— Streamlit · FastAPI · Plotly · pydeck</span><span class="layer-detail">e.g. every live app above runs on Streamlit · mcp-data-quality-agent exposes 19 tools as an MCP server</span></div>
       <div class="tree-layer" tabindex="0"><span class="branch">└──</span> <span class="layer-name">operate</span> &nbsp;<span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span><span class="layer-detail">e.g. all 9 live apps sit behind GitHub Actions CI + UptimeRobot alerting with email/SMS/voice</span></div>
     </div>
-  </section>
-
-  <section id="game">
-    <h2 class="sr-only">Play tic-tac-toe</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">play tic-tac-toe</span></span><span class="cursor"></span></div>
-    <p class="ask-cta">Think you can outsmart me? You're X, I'm O — give it a shot.</p>
-    <span class="ask-badge">★ minimax opponent — plays optimally, never loses</span>
-    <div class="ttt-modes" id="tttModes">
-      <button type="button" class="ttt-mode active" data-first="you">you go first</button>
-      <button type="button" class="ttt-mode" data-first="bot">I go first</button>
-    </div>
-    <div class="ttt-board" id="tttBoard" role="group" aria-label="Tic-tac-toe board"></div>
-    <div class="ttt-status" id="tttStatus">your move</div>
-    <button type="button" class="ttt-reset" id="tttReset">reset</button>
   </section>
 
   <section id="buildlog">
@@ -964,6 +1016,40 @@
       });
   })();
 
+  // ---------- response-time sparklines in #status, from uptime.json ----------
+  // uptime.json is generated periodically by .github/workflows/uptime-snapshot.yml
+  // via UptimeRobot's API — real response-time samples, not decoration.
+  (function initUptimeSpark(){
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.status-row[data-app]'));
+    if(!rows.length) return;
+    fetch('uptime.json', { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(data){
+        if(!data || !data.apps) return;
+        rows.forEach(function(row){
+          var app = data.apps[row.dataset.app];
+          var sparkEl = row.querySelector('.status-spark');
+          if(!app || !sparkEl || !app.points || app.points.length < 2) return;
+          sparkEl.innerHTML = sparkSvg(app.points);
+          sparkEl.setAttribute('title', 'response time, last ~48h — avg ' + app.avgMs + 'ms');
+        });
+      })
+      .catch(function(){ /* sparklines are a nice-to-have; the UP pill still shows */ });
+  })();
+
+  function sparkSvg(values){
+    var w = 56, h = 16, pad = 2;
+    var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
+    var range = (max - min) || 1;
+    var pts = values.map(function(v, i){
+      var x = pad + (i / (values.length - 1)) * (w - pad * 2);
+      var y = h - pad - ((v - min) / range) * (h - pad * 2);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+      '<polyline points="' + pts + '" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/></svg>';
+  }
+
   // ---------- scroll progress, rendered as a terminal-style bar in the titlebar ----------
   (function initScrollProgress(){
     var el = document.getElementById('scrollProgress');
@@ -1036,129 +1122,247 @@
     });
   })();
 
-  // ---------- tic-tac-toe: minimax opponent, never loses ----------
-  (function initTicTacToe(){
-    var boardEl = document.getElementById('tttBoard');
-    var statusEl = document.getElementById('tttStatus');
-    var resetBtn = document.getElementById('tttReset');
-    var modesEl = document.getElementById('tttModes');
-    if(!boardEl || !statusEl || !resetBtn) return;
+  // ---------- vrp mini-demo: build a route, compare vs nearest-neighbor and
+  // an exact optimum solved live via Held-Karp dynamic programming ----------
+  (function initVrpDemo(){
+    var wrap = document.getElementById('vrpDemo');
+    if(!wrap) return;
+    var svg = document.getElementById('vrpSvg');
+    var countBtns = Array.prototype.slice.call(wrap.querySelectorAll('.vrp-count'));
+    var shuffleBtn = document.getElementById('vrpShuffle');
+    var retryBtn = document.getElementById('vrpReset');
+    var statusEl = document.getElementById('vrpStatus');
+    var legendEl = document.getElementById('vrpLegend');
+    var resultEl = document.getElementById('vrpResult');
 
-    var WIN_LINES = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
-    ];
-    var board, over, winLine, turn, botFirst = false;
+    var SVGNS = 'http://www.w3.org/2000/svg';
+    var W = 600, H = 320;
+    var DEPOT = { x: 34, y: H / 2 };
+    var MIN_GAP = 34;
+    var MAX_STOPS = 15; // Held-Karp is O(2^n * n^2) — instant through 15, don't push much further
 
-    function checkWinner(b){
-      for(var i = 0; i < WIN_LINES.length; i++){
-        var line = WIN_LINES[i];
-        var a = b[line[0]], c = b[line[1]], d = b[line[2]];
-        if(a && a === c && a === d) return { winner: a, line: line };
+    var n = 12;
+    var stops = [];
+    var visited = [];
+    var nn = null, opt = null;
+    var done = false;
+    var solveNote = document.getElementById('vrpSolveNote');
+
+    function dist(a, b){ return Math.hypot(a.x - b.x, a.y - b.y); }
+
+    function randomLayout(count){
+      var pts = [];
+      var attempts = 0;
+      while(pts.length < count && attempts < 6000){
+        attempts++;
+        var p = { x: 90 + Math.random() * (W - 120), y: 24 + Math.random() * (H - 48) };
+        var ok = dist(p, DEPOT) > MIN_GAP;
+        for(var i = 0; ok && i < pts.length; i++){ if(dist(p, pts[i]) < MIN_GAP) ok = false; }
+        if(ok) pts.push(p);
       }
-      if(b.every(function(v){ return v; })) return { winner: 'draw', line: null };
-      return null;
+      return pts;
     }
 
-    function minimax(b, player){
-      var result = checkWinner(b);
-      if(result){
-        if(result.winner === 'O') return { score: 1 };
-        if(result.winner === 'X') return { score: -1 };
-        return { score: 0 };
+    function routeLength(route, pts){
+      var total = 0, cur = DEPOT;
+      for(var i = 0; i < route.length; i++){ total += dist(cur, pts[route[i]]); cur = pts[route[i]]; }
+      return total + dist(cur, DEPOT);
+    }
+
+    function nearestNeighbor(pts){
+      var remaining = pts.map(function(_, i){ return i; });
+      var route = [], cur = DEPOT;
+      while(remaining.length){
+        var bestIdx = 0, bestD = Infinity;
+        for(var k = 0; k < remaining.length; k++){
+          var d = dist(cur, pts[remaining[k]]);
+          if(d < bestD){ bestD = d; bestIdx = k; }
+        }
+        var chosen = remaining.splice(bestIdx, 1)[0];
+        route.push(chosen);
+        cur = pts[chosen];
       }
-      var moves = [];
-      for(var i = 0; i < 9; i++){
-        if(b[i]) continue;
-        var next = b.slice();
-        next[i] = player;
-        var outcome = minimax(next, player === 'O' ? 'X' : 'O');
-        moves.push({ index: i, score: outcome.score });
+      return { route: route, length: routeLength(route, pts) };
+    }
+
+    // Exact TSP with a fixed depot start/end via Held-Karp DP over the
+    // remaining stops. dp[mask][i] = cheapest path from the depot that
+    // visits exactly the stops in `mask`, ending at stop i.
+    function heldKarp(pts){
+      var m = pts.length;
+      var full = (1 << m) - 1;
+      var d = [];
+      for(var i = 0; i < m; i++){
+        d.push(new Float64Array(m));
+        for(var j = 0; j < m; j++) d[i][j] = dist(pts[i], pts[j]);
       }
-      var best = moves[0];
-      moves.forEach(function(m){
-        if(player === 'O' ? m.score > best.score : m.score < best.score) best = m;
+      var d0 = pts.map(function(p){ return dist(DEPOT, p); });
+      var size = 1 << m;
+      var dp = new Float64Array(size * m).fill(Infinity);
+      var parent = new Int16Array(size * m).fill(-1);
+      for(i = 0; i < m; i++) dp[(1 << i) * m + i] = d0[i];
+      for(var mask = 1; mask < size; mask++){
+        for(i = 0; i < m; i++){
+          if(!(mask & (1 << i))) continue;
+          var base = dp[mask * m + i];
+          if(base === Infinity) continue;
+          for(var j = 0; j < m; j++){
+            if(mask & (1 << j)) continue;
+            var nmask = mask | (1 << j);
+            var cand = base + d[i][j];
+            if(cand < dp[nmask * m + j]){ dp[nmask * m + j] = cand; parent[nmask * m + j] = i; }
+          }
+        }
+      }
+      var best = Infinity, bestEnd = -1;
+      for(i = 0; i < m; i++){
+        var total = dp[full * m + i] + d0[i];
+        if(total < best){ best = total; bestEnd = i; }
+      }
+      var route = [], mask2 = full, cur = bestEnd;
+      while(cur !== -1){
+        route.push(cur);
+        var p = parent[mask2 * m + cur];
+        mask2 ^= (1 << cur);
+        cur = p;
+      }
+      route.reverse();
+      return { route: route, length: best };
+    }
+
+    function animatePath(pathEl, delayMs){
+      if(!pathEl || reduceMotion) return;
+      var len = pathEl.getTotalLength();
+      pathEl.style.strokeDasharray = len;
+      pathEl.style.strokeDashoffset = len;
+      pathEl.getBoundingClientRect(); // force a layout pass so the initial offset actually applies before transitioning
+      pathEl.style.transition = 'stroke-dashoffset 900ms ease ' + (delayMs || 0) + 'ms';
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ pathEl.style.strokeDashoffset = '0'; });
       });
-      return best;
+    }
+
+    function pathD(route){
+      var d = 'M ' + DEPOT.x + ' ' + DEPOT.y;
+      route.forEach(function(i){ d += ' L ' + stops[i].x + ' ' + stops[i].y; });
+      d += ' L ' + DEPOT.x + ' ' + DEPOT.y;
+      return d;
+    }
+
+    function el(tag, attrs){
+      var e = document.createElementNS(SVGNS, tag);
+      for(var k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    function selectStop(i){
+      if(done || visited.indexOf(i) > -1) return;
+      visited.push(i);
+      render();
+      if(visited.length === stops.length) finish();
+      else statusEl.textContent = visited.length + '/' + stops.length + ' stops placed — keep going';
     }
 
     function render(){
-      boardEl.innerHTML = '';
-      board.forEach(function(v, i){
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'ttt-cell' + (v ? ' ' + v.toLowerCase() : '') + (winLine && winLine.indexOf(i) > -1 ? ' win' : '');
-        btn.textContent = v || '';
-        btn.disabled = !!v || over || turn !== 'X';
-        btn.setAttribute('aria-label', 'cell ' + (i + 1) + (v ? ', ' + v : ', empty'));
-        btn.addEventListener('click', function(idx){ return function(){ playerMove(idx); }; }(i));
-        boardEl.appendChild(btn);
-      });
-    }
-
-    function playerMove(i){
-      if(over || turn !== 'X' || board[i]) return;
-      board[i] = 'X';
-      turn = 'O';
-      var result = checkWinner(board);
-      if(result){ finish(result); return; }
-      render();
-      statusEl.textContent = 'thinking…';
-      setTimeout(computerMove, 350);
-    }
-
-    function computerMove(){
-      if(over || turn !== 'O') return;
-      var best = minimax(board, 'O');
-      board[best.index] = 'O';
-      turn = 'X';
-      var result = checkWinner(board);
-      if(result){ finish(result); return; }
-      render();
-      statusEl.textContent = 'your move';
-    }
-
-    function finish(result){
-      over = true;
-      winLine = result.line;
-      render();
-      if(result.winner === 'draw') statusEl.textContent = 'draw — solid play.';
-      else if(result.winner === 'X') statusEl.textContent = "you actually won?! that shouldn't be possible — email me, I need to know how.";
-      else statusEl.textContent = 'I win — optimal play, same as the routing solver. reset to try again.';
-    }
-
-    function reset(){
-      board = new Array(9).fill(null);
-      over = false;
-      winLine = null;
-      turn = botFirst ? 'O' : 'X';
-      render();
-      if(botFirst){
-        statusEl.textContent = 'thinking…';
-        setTimeout(computerMove, 350);
-      } else {
-        statusEl.textContent = 'your move';
+      svg.innerHTML = '';
+      if(done){
+        svg.appendChild(el('path', { class: 'vrp-nn-path', d: pathD(nn.route) }));
+        svg.appendChild(el('path', { class: 'vrp-opt-path', d: pathD(opt.route) }));
       }
-    }
+      if(visited.length){
+        svg.appendChild(el('path', { class: 'vrp-user-path', d: pathD(visited) }));
+      }
+      var depot = el('g', { class: 'vrp-depot' });
+      depot.appendChild(el('rect', { x: DEPOT.x - 12, y: DEPOT.y - 12, width: 24, height: 24, rx: 4 }));
+      var dl = el('text', { x: DEPOT.x, y: DEPOT.y + 26, 'text-anchor': 'middle' });
+      dl.textContent = 'depot';
+      depot.appendChild(dl);
+      svg.appendChild(depot);
 
-    resetBtn.addEventListener('click', reset);
-
-    if(modesEl){
-      modesEl.addEventListener('click', function(e){
-        var btn = e.target.closest('.ttt-mode');
-        if(!btn) return;
-        var wantsBotFirst = btn.dataset.first === 'bot';
-        if(wantsBotFirst === botFirst) return;
-        botFirst = wantsBotFirst;
-        Array.prototype.forEach.call(modesEl.querySelectorAll('.ttt-mode'), function(b){
-          b.classList.toggle('active', b === btn);
+      stops.forEach(function(p, i){
+        var order = visited.indexOf(i);
+        var g = el('g', { class: 'vrp-stop' + (order > -1 ? ' visited' : ''), tabindex: '0', role: 'button', 'aria-label': 'stop ' + (i + 1) });
+        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 10 }));
+        var t = el('text', { x: p.x, y: p.y + 3.5, 'text-anchor': 'middle' });
+        t.textContent = order > -1 ? String(order + 1) : String(i + 1);
+        g.appendChild(t);
+        g.addEventListener('click', function(){ selectStop(i); });
+        g.addEventListener('keydown', function(e){
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectStop(i); }
         });
-        reset();
+        svg.appendChild(g);
       });
     }
 
-    reset();
+    function finish(){
+      done = true;
+      var userLen = routeLength(visited, stops);
+      var gap = ((userLen - opt.length) / opt.length) * 100;
+      render();
+      animatePath(svg.querySelector('.vrp-nn-path'), 0);
+      animatePath(svg.querySelector('.vrp-opt-path'), 300);
+      legendEl.hidden = false;
+      resultEl.hidden = false;
+      var badgeHtml;
+      if(gap < 0.5){
+        badgeHtml = '<span class="win">that <b>is</b> the optimal route</span>';
+      } else if(userLen < nn.length - 0.5){
+        var beatBy = ((nn.length - userLen) / nn.length) * 100;
+        badgeHtml = '<span class="win">beat the naive dispatcher by <b>' + beatBy.toFixed(1) + '%</b></span>';
+      } else {
+        badgeHtml = '<span>+<b>' + gap.toFixed(1) + '%</b> over optimal</span>';
+      }
+      resultEl.innerHTML =
+        '<span>your route <b>' + Math.round(userLen) + '</b></span>' +
+        '<span>nearest-neighbor <b>' + Math.round(nn.length) + '</b></span>' +
+        '<span class="win">optimal (exact) <b>' + Math.round(opt.length) + '</b></span>' +
+        badgeHtml;
+      statusEl.textContent = 'route closed — see the comparison below';
+    }
+
+    function newLayout(){
+      stops = randomLayout(n);
+      visited = [];
+      done = false;
+      nn = nearestNeighbor(stops);
+      var t0 = performance.now();
+      opt = heldKarp(stops);
+      var solveMs = performance.now() - t0;
+      var subsets = Math.pow(2, n);
+      if(solveNote){
+        solveNote.innerHTML = 'solved exactly via Held-Karp DP: <b>' + subsets.toLocaleString() +
+          '</b> subsets × ' + n + '² transitions in <b>' + solveMs.toFixed(1) + 'ms</b> — no heuristic, no shortcuts';
+      }
+      legendEl.hidden = true;
+      resultEl.hidden = true;
+      resultEl.innerHTML = '';
+      statusEl.textContent = 'click a stop to start your route';
+      render();
+    }
+
+    function retry(){
+      visited = [];
+      done = false;
+      legendEl.hidden = true;
+      resultEl.hidden = true;
+      resultEl.innerHTML = '';
+      statusEl.textContent = 'click a stop to start your route';
+      render();
+    }
+
+    countBtns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var wantN = Math.min(MAX_STOPS, parseInt(btn.dataset.n, 10));
+        if(wantN === n) return;
+        n = wantN;
+        countBtns.forEach(function(b){ b.classList.toggle('active', b === btn); });
+        newLayout();
+      });
+    });
+    shuffleBtn.addEventListener('click', newLayout);
+    retryBtn.addEventListener('click', retry);
+
+    newLayout();
   })();
 
   // ---------- section nav: scroll-spy dots ----------
