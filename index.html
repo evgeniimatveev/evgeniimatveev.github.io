@@ -263,9 +263,14 @@
   /* ---------- skills tree ---------- */
   .tree{ font-family:var(--mono-ui); font-size:13px; line-height:2; }
   .tree-layer{ margin-bottom:4px; }
-  .tree-layer .branch{ color:var(--text-faint); }
-  .tree-layer .layer-name{ color:var(--accent-strong); font-weight:500; }
-  .tree-layer .items{ color:var(--text-dim); }
+  .tree-row{ display:flex; align-items:baseline; }
+  .tree-row .branch{ color:var(--text-faint); flex:0 0 auto; margin-right:8px; }
+  .tree-row .layer-name{ color:var(--accent-strong); font-weight:500; flex:0 0 88px; }
+  .tree-row .items{ color:var(--text-dim); }
+  @media (max-width:600px){
+    .tree-row{ flex-wrap:wrap; }
+    .tree-row .items{ flex-basis:100%; padding-left:28px; }
+  }
 
   /* ---------- infra log ---------- */
   .log-line{ display:flex; gap:14px; padding:12px 0; border-top:1px solid var(--border-soft); font-size:13px; }
@@ -426,10 +431,10 @@
   .tree-layer{ cursor:default; border-radius:2px; transition:background .15s ease; }
   .tree-layer .layer-detail{
     display:block; max-height:0; overflow:hidden; opacity:0; color:var(--text-faint); font-size:12px;
-    padding-left:22px; transition:max-height .25s ease, opacity .2s ease, margin .25s ease;
+    padding-left:30px; transition:max-height .25s ease, opacity .2s ease, margin .25s ease;
   }
-  .tree-layer:hover, .tree-layer:focus-visible{ background:var(--accent-soft); outline:none; }
-  .tree-layer:hover .layer-detail, .tree-layer:focus-visible .layer-detail{
+  .tree-layer:hover, .tree-layer:focus-visible, .tree-layer.open{ background:var(--accent-soft); outline:none; }
+  .tree-layer:hover .layer-detail, .tree-layer:focus-visible .layer-detail, .tree-layer.open .layer-detail{
     max-height:2.6em; opacity:1; margin-top:2px;
   }
 </style>
@@ -741,13 +746,31 @@
   <section id="skills">
     <h2 class="sr-only">Skills</h2>
     <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tree skills/</span></span><span class="cursor"></span></div>
-    <div class="tree">
-      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">collect</span> <span class="items">— Python · REST APIs · Kaggle datasets · web scraping</span><span class="layer-detail">e.g. job-market-pulse pulls 100+ Adzuna API calls/day · weather-pipeline hits 20 cities across 6 continents twice daily</span></div>
-      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">store</span> &nbsp;&nbsp;&nbsp;<span class="items">— PostgreSQL · DuckDB · MotherDuck · Snowflake · Supabase</span><span class="layer-detail">e.g. so-survey-analytics loads 65K dev responses into DuckDB · uber-driver-analytics runs on PostgreSQL</span></div>
-      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">transform</span><span class="items">— dbt · pandas · SQL (window functions, CTEs)</span><span class="layer-detail">e.g. olist-e-commerce-analytics — 13 dbt models, 54 tests, over 100K+ marketplace orders</span></div>
-      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">model</span> &nbsp;&nbsp;<span class="items">— OR-Tools · MLflow · Weights &amp; Biases · XGBoost / CatBoost / LightGBM</span><span class="layer-detail">e.g. route-optimization-vrp's OR-Tools solver · cv-logistics-mlops tracked via MLflow + W&amp;B</span></div>
-      <div class="tree-layer" tabindex="0"><span class="branch">├──</span> <span class="layer-name">serve</span> &nbsp;&nbsp;<span class="items">— Streamlit · FastAPI · Plotly · pydeck</span><span class="layer-detail">e.g. every live app above runs on Streamlit · mcp-data-quality-agent exposes 19 tools as an MCP server</span></div>
-      <div class="tree-layer" tabindex="0"><span class="branch">└──</span> <span class="layer-name">operate</span> &nbsp;<span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span><span class="layer-detail">e.g. all 9 live apps sit behind GitHub Actions CI + UptimeRobot alerting with email/SMS/voice</span></div>
+    <div class="tree" id="skillsTree">
+      <div class="tree-layer" tabindex="0">
+        <div class="tree-row"><span class="branch">├──</span><span class="layer-name">collect</span><span class="items">— Python · REST APIs · Kaggle datasets · web scraping</span></div>
+        <span class="layer-detail">e.g. job-market-pulse pulls 100+ Adzuna API calls/day · weather-pipeline hits 20 cities across 6 continents twice daily</span>
+      </div>
+      <div class="tree-layer" tabindex="0">
+        <div class="tree-row"><span class="branch">├──</span><span class="layer-name">store</span><span class="items">— PostgreSQL · DuckDB · MotherDuck · Snowflake · Supabase</span></div>
+        <span class="layer-detail">e.g. so-survey-analytics loads 65K dev responses into DuckDB · uber-driver-analytics runs on PostgreSQL</span>
+      </div>
+      <div class="tree-layer" tabindex="0">
+        <div class="tree-row"><span class="branch">├──</span><span class="layer-name">transform</span><span class="items">— dbt · pandas · SQL (window functions, CTEs)</span></div>
+        <span class="layer-detail">e.g. olist-e-commerce-analytics — 13 dbt models, 54 tests, over 100K+ marketplace orders</span>
+      </div>
+      <div class="tree-layer" tabindex="0">
+        <div class="tree-row"><span class="branch">├──</span><span class="layer-name">model</span><span class="items">— OR-Tools · MLflow · Weights &amp; Biases · XGBoost / CatBoost / LightGBM</span></div>
+        <span class="layer-detail">e.g. route-optimization-vrp's OR-Tools solver · cv-logistics-mlops tracked via MLflow + W&amp;B</span>
+      </div>
+      <div class="tree-layer" tabindex="0">
+        <div class="tree-row"><span class="branch">├──</span><span class="layer-name">serve</span><span class="items">— Streamlit · FastAPI · Plotly · pydeck</span></div>
+        <span class="layer-detail">e.g. every live app above runs on Streamlit · mcp-data-quality-agent exposes 19 tools as an MCP server</span>
+      </div>
+      <div class="tree-layer" tabindex="0">
+        <div class="tree-row"><span class="branch">└──</span><span class="layer-name">operate</span><span class="items">— Docker · GitHub Actions · pytest · UptimeRobot</span></div>
+        <span class="layer-detail">e.g. all 9 live apps sit behind GitHub Actions CI + UptimeRobot alerting with email/SMS/voice</span>
+      </div>
     </div>
   </section>
 
@@ -1049,6 +1072,18 @@
     return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
       '<polyline points="' + pts + '" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/></svg>';
   }
+
+  // ---------- skills tree: tap-to-toggle detail lines ----------
+  // :hover/:focus-visible alone don't reliably reveal .layer-detail on touch
+  // devices (no hover, and a tap rarely qualifies as focus-visible), so a
+  // plain click also toggles an .open class that the same CSS reacts to.
+  (function initSkillsTree(){
+    var tree = document.getElementById('skillsTree');
+    if(!tree) return;
+    Array.prototype.forEach.call(tree.querySelectorAll('.tree-layer'), function(layer){
+      layer.addEventListener('click', function(){ layer.classList.toggle('open'); });
+    });
+  })();
 
   // ---------- scroll progress, rendered as a terminal-style bar in the titlebar ----------
   (function initScrollProgress(){
