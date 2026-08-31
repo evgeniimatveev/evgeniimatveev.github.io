@@ -712,15 +712,26 @@
 
     <div class="case">
       <div class="case-head">
-        <div class="case-title">cv-logistics-mlops</div>
-        <div class="case-meta">Computer vision + MLOps</div>
+        <div class="case-title">weather-pipeline</div>
+        <div class="case-meta">Open-Meteo API · DuckDB ETL</div>
       </div>
-      <div class="flow">bin image<span class="arrow">→</span>CV classifier<span class="arrow">→</span>MLflow / W&amp;B tracking<span class="arrow">→</span>weekly retrain job</div>
-      <div class="case-field"><span class="k">problem</span><div class="v">Manual bin-count checks in a logistics workflow are slow and inconsistent between people.</div></div>
-      <div class="case-field"><span class="k">approach</span><div class="v">A CV classifier with every experiment tracked in MLflow and Weights &amp; Biases, wired to a scheduled retraining job so the model doesn't quietly drift.</div></div>
+      <div class="flow">20 cities, 6 continents<span class="arrow">→</span>Open-Meteo API<span class="arrow">→</span>retry + validate<span class="arrow">→</span>DuckDB (R2)<span class="arrow">→</span>Streamlit dashboard</div>
+      <div class="case-field"><span class="k">problem</span><div class="v">A single flaky Open-Meteo API call — a <code>ConnectTimeout</code>, common on a shared GitHub Actions runner — used to crash the entire twice-daily run, losing all 20 cities' data instead of just the one that failed.</div></div>
+      <div class="case-field"><span class="k">approach</span><div class="v">Per-city retry with exponential backoff, graceful skip-on-failure so one bad connection doesn't take the whole run down, plus a post-pipeline data-quality gate that fails the GitHub Actions job outright if fewer than 15 of 20 cities load cleanly — 18/20 is treated as a normal pass, not a false alarm, since transient timeouts on a shared CI runner are expected.</div></div>
+      <div class="case-field incident"><span class="k">incident — 2026-08-20</span><div class="v"><code>src/extract.py</code> imports <code>tenacity</code> for that retry logic, but it was never declared in <code>requirements.txt</code> — every scheduled and manual pipeline run had been crashing on import, silently, for days. Surfaced only while testing an unrelated storage migration (HuggingFace Dataset → Cloudflare R2), not by anyone noticing the missing data. Fixed with a one-line dependency addition, verified against a real GitHub Actions run.
+        <details class="diff-details">
+          <summary>requirements.txt · commit f38883a · view the real diff</summary>
+          <pre class="diff-block"><code> httpx&gt;=0.27.0
+<span class="diff-add">+tenacity&gt;=8.2.0</span>
+ pandas&gt;=2.2.0
+ duckdb&gt;=0.10.0
+ boto3&gt;=1.34.0</code></pre>
+        </details>
+      </div></div>
       <div class="case-result">
-        <span>running in production</span>
-        <span>weekly automated retrain</span>
+        <span><b>20</b> cities · 6 continents</span>
+        <span><b>2×/day</b> fully automated</span>
+        <span><b>15/20</b> quality-gate floor</span>
       </div>
     </div>
   </section>
