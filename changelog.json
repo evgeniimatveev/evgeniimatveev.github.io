@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-31",
+    "summary": "Portfolio redesign: VRP demo replaces tic-tac-toe, live sparklines added, skills-tree and case studies updated."
+  },
+  {
+    "date": "2026-08-31",
     "summary": "Replaced portfolio tic-tac-toe demo with live VRP solver; added response-time sparklines, dynamic counters, and ambient visual polish."
   },
   {
