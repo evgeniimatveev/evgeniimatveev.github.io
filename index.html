@@ -46,6 +46,7 @@
     --accent:        hsl(var(--accent-hue) 90% 68%);
     --accent-strong: hsl(var(--accent-hue) 100% 78%);
     --accent-soft:   hsl(var(--accent-hue) 90% 68% / 0.16);
+    --accent-shine:  hsl(var(--accent-hue) 92% 74% / 0.4);
     --ok:            #6FCF8E;
     --ok-soft:       rgba(111,207,142,0.12);
     --warn:          #E8C34D;
@@ -107,6 +108,21 @@
     background:hsl(calc(var(--accent-hue) + 40) 80% 55% / 0.05);
   }
   ::selection{ background:var(--accent-soft); color:var(--accent-strong); }
+
+  /* Scan beam: a soft light band that sweeps top to bottom of the page on
+     a slow loop, screen-blended so it brightens rather than obscures
+     whatever it passes over. Same chameleon accent as everything else. */
+  .page-scan{
+    position:fixed; left:0; right:0; top:0; height:160px;
+    background:linear-gradient(180deg, transparent, var(--accent-soft) 42%, var(--accent-shine) 50%, var(--accent-soft) 58%, transparent);
+    mix-blend-mode:screen; opacity:.8; pointer-events:none; z-index:10;
+    animation:page-scan-move 12s linear infinite;
+  }
+  @keyframes page-scan-move{
+    0%{ transform:translateY(-160px); }
+    100%{ transform:translateY(100vh); }
+  }
+  @media (prefers-reduced-motion: reduce){ .page-scan{ display:none; } }
 
   /* Visually hidden but screen-reader-accessible — each section gets a
      real heading for a11y/document outline purposes, without disturbing
@@ -431,12 +447,12 @@
   }
   .ask-badge::before{
     content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
-    background:linear-gradient(115deg, transparent, rgba(255,201,140,0.35), transparent);
+    background:linear-gradient(115deg, transparent, var(--accent-shine), transparent);
     animation:badge-shine 3.4s ease-in-out infinite;
   }
   @keyframes badge-glow{
-    0%,100%{ box-shadow:0 0 5px 0 rgba(240,168,104,.35), inset 0 0 6px 0 rgba(240,168,104,.05); }
-    50%{ box-shadow:0 0 15px 1px rgba(240,168,104,.7), inset 0 0 10px 0 rgba(240,168,104,.12); }
+    0%,100%{ box-shadow:0 0 5px 0 var(--accent-soft), inset 0 0 6px 0 var(--accent-soft); }
+    50%{ box-shadow:0 0 16px 2px var(--accent), inset 0 0 10px 0 var(--accent-soft); }
   }
   @keyframes badge-shine{ 0%{ left:-60%; } 55%,100%{ left:130%; } }
   @media (prefers-reduced-motion: reduce){ .ask-badge, .ask-badge::before{ animation:none; } }
@@ -489,6 +505,7 @@
   }
 </style>
 
+<div class="page-scan" aria-hidden="true"></div>
 <div class="term-titlebar">
   <div class="term-titlebar-inner">
     <div class="dots"><span></span><span></span><span></span></div>
