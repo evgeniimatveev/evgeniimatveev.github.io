@@ -57,10 +57,17 @@
     animation: chameleon 26s linear infinite;
   }
 
-  /* Full spectrum sweep, one direction, seamless loop: amber -> gold ->
-     green -> cyan -> blue -> violet -> magenta -> red -> back to amber. */
+  /* Curated 5-stop loop, not a full-spectrum sweep — picked to stay clear
+     of the semantic colors (--ok green ~145deg, --warn amber ~45deg,
+     --critical red ~356deg) so the accent never visually collides with a
+     status pill or "UP" dot mid-cycle. amber -> teal -> cobalt -> violet
+     -> wine -> back to amber, each stop an even 20% of the loop. */
   @keyframes chameleon{
     0%   { --accent-hue: 30; }
+    20%  { --accent-hue: 185; }
+    40%  { --accent-hue: 220; }
+    60%  { --accent-hue: 270; }
+    80%  { --accent-hue: 335; }
     100% { --accent-hue: 390; }
   }
   @media (prefers-reduced-motion: reduce){
