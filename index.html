@@ -184,6 +184,16 @@
   .cursor{ display:inline-block; width:7px; height:14px; background:var(--accent-strong); vertical-align:-2px; opacity:0; box-shadow:0 0 6px 0 var(--accent-soft); }
   .prompt.is-active .cursor{ animation:blink 1.1s steps(1) infinite; opacity:1; }
   .prompt.is-typing .cursor{ animation:none; opacity:1; }
+
+  /* ---------- typed terminal output, printed under a command once it finishes typing ---------- */
+  .prompt.has-output{ border-bottom:none; padding-bottom:0; margin-bottom:0; }
+  .prompt-output{
+    font-family:var(--mono-ui); font-size:12px; color:var(--text-faint); line-height:1.75;
+    margin:2px 0 18px; padding-bottom:10px; border-bottom:1px solid var(--border-soft);
+  }
+  .prompt-output .out-line{ opacity:0; transform:translateY(-2px); transition:opacity .2s ease, transform .2s ease; }
+  .prompt-output .out-line.in{ opacity:1; transform:none; }
+  .prompt-output .out-accent{ color:var(--accent-strong); }
   @media (prefers-reduced-motion: reduce){
     .cursor{ opacity:.7 !important; animation:none !important; }
   }
@@ -509,7 +519,7 @@
 
   <section id="whoami">
     <h2 class="sr-only">About me</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">whoami</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="evgeniimatveev|Analytics &amp; MLOps Engineer · Burbank, CA · open to remote &amp; relocation"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">whoami</span></span><span class="cursor"></span></div>
     <h1 class="whoami-name">evgeniimatveev</h1>
     <div class="whoami-role">Analytics &amp; MLOps Engineer</div>
     <div class="whoami-loc">Burbank, CA</div>
@@ -521,7 +531,7 @@
 
   <section id="ask" class="ask-featured">
     <h2 class="sr-only">Ask me anything</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ask --live</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="loading corpus... 307 chunks embedded (bge-m3, multilingual)|ready — ask in any language, grounded in real commits and incidents"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ask --live</span></span><span class="cursor"></span></div>
     <p class="ask-cta">Ask anything you need to know — my stack, a real incident, why I'm job searching, logistics. Grounded in my real work, not scripted.</p>
     <span class="ask-badge">★ ask in any language — RAG-grounded, not a chatbot script</span>
     <p class="stat-note">answers in your language, pulled from 300+ real facts — 33 repos, incident postmortems, interview stories — via Vectorize + Workers AI, generated live by Claude (Haiku 4.5)</p>
@@ -546,7 +556,7 @@
 
   <section id="status">
     <h2 class="sr-only">Live system status</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">systemctl status --all</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="9 loaded units, 9 active (running), 0 failed"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">systemctl status --all</span></span><span class="cursor"></span></div>
     <p class="stat-note">manual snapshot, last verified 2026‑08‑18 — not a live feed, see <a href="#infra">infra.log</a> for why</p>
     <div class="stat-grid">
       <div class="stat-tile">
@@ -586,7 +596,7 @@
 
   <section id="projects">
     <h2 class="sr-only">Projects</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ls projects/ --sort=impact -la</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="drwxr-xr-x  route-optimization-vrp/|drwxr-xr-x  mcp-data-quality-agent/|drwxr-xr-x  cv-logistics-mlops/|drwxr-xr-x  crypto-onchain-dashboard/|drwxr-xr-x  tech-layoffs-tracker/|drwxr-xr-x  so-survey-analytics/|drwxr-xr-x  job-market-pulse/|drwxr-xr-x  weather-pipeline/|drwxr-xr-x  olist-e-commerce-analytics/|drwxr-xr-x  uber-driver-analytics/|drwxr-xr-x  interview-coach/|11 directories, sorted by real-world impact — not resume order"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">ls projects/ --sort=impact -la</span></span><span class="cursor"></span></div>
     <div class="project-grid">
 
       <div class="project-card">
@@ -682,7 +692,7 @@
 
   <section id="cases">
     <h2 class="sr-only">Incident postmortems</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">cat projects/*/POSTMORTEM.md</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="3 files matched|real incidents, not sanitized case studies"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">cat projects/*/POSTMORTEM.md</span></span><span class="cursor"></span></div>
 
     <div class="case">
       <div class="case-head">
@@ -778,7 +788,7 @@
 
   <section id="infra">
     <h2 class="sr-only">Infrastructure and monitoring</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">cat infra.log</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="3 entries: KEEPALIVE, MONITORING, CI/CD"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">cat infra.log</span></span><span class="cursor"></span></div>
 
     <div class="log-line">
       <div class="log-tag">KEEPALIVE</div>
@@ -893,7 +903,7 @@
 
   <section id="skills">
     <h2 class="sr-only">Skills</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tree skills/</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="6 layers: collect → store → transform → model → serve → operate"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tree skills/</span></span><span class="cursor"></span></div>
     <div class="tree" id="skillsTree">
       <div class="tree-layer" tabindex="0">
         <div class="tree-row"><span class="branch">├──</span><span class="layer-name">collect</span><span class="items">— Python · REST APIs · Kaggle datasets · web scraping</span></div>
@@ -924,14 +934,14 @@
 
   <section id="buildlog">
     <h2 class="sr-only">Build log</h2>
-    <div class="prompt"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tail -f build.log</span></span><span class="cursor"></span></div>
+    <div class="prompt" data-out="streaming last 30 entries, auto-summarized daily by GitHub Actions + Claude"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">tail -f build.log</span></span><span class="cursor"></span></div>
     <p class="stat-note">auto-generated daily by a GitHub Action + Claude, summarizing real commits across the repos above — not hand-written</p>
     <div id="buildlog-list" class="status-list"></div>
   </section>
 
   <footer id="contact">
     <h2 class="sr-only">Contact</h2>
-    <div class="prompt" style="border-bottom:none; margin-bottom:0;"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
+    <div class="prompt" style="border-bottom:none; margin-bottom:0;" data-out="3 channels ready: email · linkedin · github"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">contact --send</span></span><span class="cursor"></span></div>
     <div class="contact-row">
       <a href="https://github.com/evgeniimatveev" target="_blank" rel="noopener">github.com/evgeniimatveev ↗</a>
       <a href="https://www.linkedin.com/in/evgenii-matveev-510926276/" target="_blank" rel="noopener">linkedin ↗</a>
@@ -966,14 +976,48 @@
     promptEl.classList.add('is-active');
   }
 
+  function revealOutput(promptEl){
+    var raw = promptEl.getAttribute('data-out');
+    if(!raw || promptEl.dataset.outDone === '1') return;
+    promptEl.dataset.outDone = '1';
+    promptEl.classList.add('has-output');
+    var lines = raw.split('|');
+    var wrap = document.createElement('div');
+    wrap.className = 'prompt-output';
+    promptEl.insertAdjacentElement('afterend', wrap);
+
+    if(reduceMotion){
+      lines.forEach(function(l){
+        var lineEl = document.createElement('div');
+        lineEl.className = 'out-line in';
+        lineEl.textContent = l;
+        wrap.appendChild(lineEl);
+      });
+      return;
+    }
+
+    var i = 0;
+    (function step(){
+      if(i >= lines.length) return;
+      var lineEl = document.createElement('div');
+      lineEl.className = 'out-line';
+      lineEl.textContent = lines[i];
+      wrap.appendChild(lineEl);
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ lineEl.classList.add('in'); }); });
+      i++;
+      setTimeout(step, 90 + Math.random() * 60);
+    })();
+  }
+
   function typePrompt(promptEl){
     var textEl = promptEl.querySelector('.cmd-text');
-    if(!textEl || textEl.dataset.typed === '1') { setActive(promptEl); return; }
+    if(!textEl || textEl.dataset.typed === '1') { setActive(promptEl); revealOutput(promptEl); return; }
     textEl.dataset.typed = '1';
     var full = textEl.textContent;
 
     if(reduceMotion){
       setActive(promptEl);
+      revealOutput(promptEl);
       return;
     }
 
@@ -988,6 +1032,7 @@
       } else {
         promptEl.classList.remove('is-typing');
         setActive(promptEl);
+        setTimeout(function(){ revealOutput(promptEl); }, 320);
       }
     })();
   }
