@@ -304,13 +304,17 @@
   }
   .arch-wrap svg{ display:block; width:100%; height:auto; overflow:visible; }
   .arch-diagram text{ font-family:var(--mono-ui); pointer-events:none; }
-  .arch-diagram .node-title{ fill:var(--text); font-size:11px; font-weight:600; }
-  .arch-diagram .node-sub{ fill:var(--text-faint); font-size:8.5px; }
-  .arch-diagram .node-rect{ fill:var(--bg-panel); stroke:var(--border); stroke-width:1.3; transition:stroke .2s ease, stroke-width .2s ease, filter .2s ease; }
-  .arch-diagram .node-bubble{ fill:var(--bg-panel); stroke:var(--accent); stroke-width:1.4; transition:stroke .2s ease, stroke-width .2s ease, filter .2s ease; }
+  .arch-diagram .node-title{ fill:var(--text); font-size:11.5px; font-weight:600; letter-spacing:.01em; }
+  .arch-diagram .node-sub{ fill:var(--text-faint); font-size:9px; letter-spacing:.015em; }
+  .arch-diagram .node-rect{ fill:var(--bg-panel); fill-opacity:.9; stroke:var(--border); stroke-width:1.3; filter:url(#node-elevate); transition:stroke .2s ease, stroke-width .2s ease, filter .2s ease; }
+  .arch-diagram .node-bubble{ fill:var(--bg-panel); fill-opacity:.9; stroke:var(--accent); stroke-width:1.4; filter:url(#node-elevate); transition:stroke .2s ease, stroke-width .2s ease, filter .2s ease; }
   .arch-diagram .bubble-title{ fill:var(--text-dim); font-size:9.5px; font-weight:600; }
-  .arch-diagram .node-sink{ fill:var(--accent-soft); stroke:var(--accent-strong); stroke-width:1.5; transition:filter .2s ease; }
+  .arch-diagram .node-sink{ fill:var(--accent-soft); stroke:var(--accent-strong); stroke-width:1.5; filter:url(#node-elevate); transition:filter .2s ease; }
   .arch-diagram .sink-title{ fill:var(--accent-strong); font-size:11px; font-weight:700; }
+  .arch-diagram .node-gloss{ fill:url(#node-gloss); pointer-events:none; }
+  .arch-diagram .node-icon-bg{ fill:var(--bg-panel-2); stroke:var(--accent); stroke-width:1.2; }
+  .arch-diagram .node-icon .icon-line{ stroke:var(--accent-strong); stroke-width:1.4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .arch-diagram .node-icon .icon-fill{ fill:var(--accent-strong); stroke:none; }
   .arch-diagram .edge{ fill:none; stroke:var(--border); stroke-width:1.3; transition:stroke .2s ease, stroke-width .2s ease, filter .2s ease; }
   .arch-diagram .flow-dot{ fill:var(--accent-strong); filter:drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 8px var(--accent-soft)); }
   .arch-diagram .node-halo{ fill:var(--accent-strong); opacity:0; filter:url(#arch-glow-blur); pointer-events:none; }
@@ -821,6 +825,13 @@
           <filter id="arch-glow-blur" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur stdDeviation="7"/>
           </filter>
+          <filter id="node-elevate" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"/>
+          </filter>
+          <linearGradient id="node-gloss" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.09"/>
+            <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+          </linearGradient>
         </defs>
 
         <!-- row 1: ask --live -->
@@ -855,20 +866,36 @@
         <g class="arch-lane arch-lane1" tabindex="0" aria-label="ask --live pipeline">
           <rect class="node-halo" x="92" y="40" width="158" height="60" rx="10"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.5s" begin="1.5s" repeatCount="indefinite"/></rect>
           <rect class="node-rect" x="96" y="44" width="150" height="52" rx="6"/>
+          <rect class="node-gloss" x="98" y="46" width="146" height="23" rx="5"/>
           <text class="node-title" x="171" y="66" text-anchor="middle">Worker</text>
           <text class="node-sub" x="171" y="80" text-anchor="middle">evgeniimatveev-ask</text>
+          <g class="node-icon" transform="translate(96,44)">
+            <circle class="node-icon-bg" r="9"/>
+            <path class="icon-fill" d="M1,-5 L-3,1 L-0.5,1 L-1.5,5 L3,-1 L0.5,-1 Z"/>
+          </g>
         </g>
         <g class="arch-lane arch-lane1" tabindex="0" aria-label="ask --live pipeline">
           <rect class="node-halo" x="266" y="40" width="198" height="60" rx="10"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.5s" begin="1.9s" repeatCount="indefinite"/></rect>
           <rect class="node-rect" x="270" y="44" width="190" height="52" rx="6"/>
+          <rect class="node-gloss" x="272" y="46" width="186" height="23" rx="5"/>
           <text class="node-title" x="365" y="66" text-anchor="middle">Workers AI + Vectorize</text>
           <text class="node-sub" x="365" y="80" text-anchor="middle">307 chunks · bge-m3 embed</text>
+          <g class="node-icon" transform="translate(270,44)">
+            <circle class="node-icon-bg" r="9"/>
+            <circle class="icon-line" cx="-1" cy="-1" r="3"/>
+            <line class="icon-line" x1="1.3" y1="1.3" x2="4" y2="4"/>
+          </g>
         </g>
         <g class="arch-lane arch-lane1" tabindex="0" aria-label="ask --live pipeline">
           <rect class="node-halo" x="480" y="40" width="158" height="60" rx="10"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.5s" begin="2.3s" repeatCount="indefinite"/></rect>
           <rect class="node-rect" x="484" y="44" width="150" height="52" rx="6"/>
+          <rect class="node-gloss" x="486" y="46" width="146" height="23" rx="5"/>
           <text class="node-title" x="559" y="66" text-anchor="middle">Claude Haiku 4.5</text>
           <text class="node-sub" x="559" y="80" text-anchor="middle">grounded answer</text>
+          <g class="node-icon" transform="translate(484,44)">
+            <circle class="node-icon-bg" r="9"/>
+            <path class="icon-fill" d="M0,-5 L1,-1 L5,0 L1,1 L0,5 L-1,1 L-5,0 L-1,-1 Z"/>
+          </g>
         </g>
 
         <!-- row 2 nodes: build.log -->
@@ -880,20 +907,41 @@
         <g class="arch-lane arch-lane2" tabindex="0" aria-label="build.log pipeline">
           <rect class="node-halo" x="92" y="190" width="178" height="60" rx="10"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.5s" begin="1.7s" repeatCount="indefinite"/></rect>
           <rect class="node-rect" x="96" y="194" width="170" height="52" rx="6"/>
+          <rect class="node-gloss" x="98" y="196" width="166" height="23" rx="5"/>
           <text class="node-title" x="181" y="216" text-anchor="middle">GitHub Action</text>
           <text class="node-sub" x="181" y="230" text-anchor="middle">reads recent commits</text>
+          <g class="node-icon" transform="translate(96,194)">
+            <circle class="node-icon-bg" r="9"/>
+            <circle class="icon-line" r="2.6"/>
+            <line class="icon-line" x1="0" y1="-5" x2="0" y2="-3.6"/>
+            <line class="icon-line" x1="0" y1="3.6" x2="0" y2="5"/>
+            <line class="icon-line" x1="-5" y1="0" x2="-3.6" y2="0"/>
+            <line class="icon-line" x1="3.6" y1="0" x2="5" y2="0"/>
+          </g>
         </g>
         <g class="arch-lane arch-lane2" tabindex="0" aria-label="build.log pipeline">
           <rect class="node-halo" x="286" y="190" width="178" height="60" rx="10"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.5s" begin="2.1s" repeatCount="indefinite"/></rect>
           <rect class="node-rect" x="290" y="194" width="170" height="52" rx="6"/>
+          <rect class="node-gloss" x="292" y="196" width="166" height="23" rx="5"/>
           <text class="node-title" x="375" y="216" text-anchor="middle">Claude Haiku 4.5</text>
           <text class="node-sub" x="375" y="230" text-anchor="middle">&#8804;22-word summary</text>
+          <g class="node-icon" transform="translate(290,194)">
+            <circle class="node-icon-bg" r="9"/>
+            <path class="icon-fill" d="M0,-5 L1,-1 L5,0 L1,1 L0,5 L-1,1 L-5,0 L-1,-1 Z"/>
+          </g>
         </g>
         <g class="arch-lane arch-lane2" tabindex="0" aria-label="build.log pipeline">
           <rect class="node-halo" x="480" y="190" width="158" height="60" rx="10"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.5s" begin="2.5s" repeatCount="indefinite"/></rect>
           <rect class="node-rect" x="484" y="194" width="150" height="52" rx="6"/>
+          <rect class="node-gloss" x="486" y="196" width="146" height="23" rx="5"/>
           <text class="node-title" x="559" y="216" text-anchor="middle">changelog.json</text>
           <text class="node-sub" x="559" y="230" text-anchor="middle">committed to repo</text>
+          <g class="node-icon" transform="translate(484,194)">
+            <circle class="node-icon-bg" r="9"/>
+            <path class="icon-line" d="M-3,-5 H1.5 L3,-3.5 V5 H-3 Z"/>
+            <line class="icon-line" x1="-1.5" y1="0.5" x2="1.5" y2="0.5"/>
+            <line class="icon-line" x1="-1.5" y1="2.5" x2="1.5" y2="2.5"/>
+          </g>
         </g>
 
         <!-- shared sink: both flows render back on this page -->
@@ -901,8 +949,15 @@
           <rect class="node-halo" x="654" y="89" width="98" height="112" rx="16"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.1s" begin="2.3s" repeatCount="indefinite"/></rect>
           <rect class="node-halo" x="654" y="89" width="98" height="112" rx="16"><animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.18;1" dur="1.1s" begin="2.5s" repeatCount="indefinite"/></rect>
           <rect class="node-sink" x="660" y="95" width="86" height="100" rx="12"/>
+          <rect class="node-gloss" x="662" y="97" width="82" height="45" rx="10"/>
           <text class="sink-title" x="703" y="140" text-anchor="middle">this</text>
           <text class="sink-title" x="703" y="154" text-anchor="middle">page</text>
+          <g class="node-icon" transform="translate(660,95)">
+            <circle class="node-icon-bg" r="9"/>
+            <rect class="icon-line" x="-5" y="-4" width="10" height="7" rx="1"/>
+            <line class="icon-line" x1="-5" y1="-1.3" x2="5" y2="-1.3"/>
+            <circle class="icon-fill" cx="-3.3" cy="-2.6" r="0.6"/>
+          </g>
         </g>
       </svg>
       <p class="arch-caption">same Claude Haiku 4.5 model, two independent triggers — one answers you, one writes the log above</p>
