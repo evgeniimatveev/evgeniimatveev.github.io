@@ -109,29 +109,6 @@
   }
   ::selection{ background:var(--accent-soft); color:var(--accent-strong); }
 
-  /* Glint: a sharp, elegant star-flare near the hero name — flashes bright
-     for an instant, then fades while drifting a few px along a short
-     trajectory, like sunlight catching glass. One quiet moment per loop,
-     not a constant effect — restrained on purpose. */
-  .glint{
-    position:absolute; top:8px; left:-6px; width:26px; height:26px;
-    pointer-events:none; opacity:0;
-    animation:glint-flash 9s ease-in infinite;
-  }
-  .glint::before, .glint::after{
-    content:""; position:absolute; top:50%; left:50%;
-    background:linear-gradient(90deg, transparent, var(--accent-strong), transparent);
-  }
-  .glint::before{ width:26px; height:2px; transform:translate(-50%,-50%); }
-  .glint::after{ width:2px; height:26px; transform:translate(-50%,-50%); }
-  @keyframes glint-flash{
-    0%, 90%{ opacity:0; transform:scale(.4) translate(0,0); }
-    92%{ opacity:1; transform:scale(1.15) translate(0,0); }
-    94%{ opacity:.85; transform:scale(.9) translate(0,0); }
-    100%{ opacity:0; transform:scale(.5) translate(5px,4px); }
-  }
-  @media (prefers-reduced-motion: reduce){ .glint{ display:none; } }
-
   /* Visually hidden but screen-reader-accessible — each section gets a
      real heading for a11y/document outline purposes, without disturbing
      the terminal $ command line that's the visible section label. */
@@ -226,7 +203,7 @@
   .comment{ color:var(--text-faint); }
 
   /* ---------- hero / whoami ---------- */
-  .whoami-name{ position:relative; font-size:clamp(28px,5vw,40px); font-weight:800; letter-spacing:-.01em; color:var(--text); }
+  .whoami-name{ font-size:clamp(28px,5vw,40px); font-weight:800; letter-spacing:-.01em; color:var(--text); }
   .whoami-role{ margin-top:6px; font-size:16px; color:var(--accent-strong); font-weight:500; }
   .whoami-loc{ margin-top:2px; font-size:13px; color:var(--text-dim); }
   .whoami-stack{ margin-top:16px; font-size:13px; color:var(--text-dim); line-height:1.9; }
@@ -544,7 +521,7 @@
   <section id="whoami">
     <h2 class="sr-only">About me</h2>
     <div class="prompt" data-out="evgeniimatveev|Analytics &amp; MLOps Engineer · Burbank, CA · open to remote &amp; relocation"><span class="user">evgeniimatveev</span><span class="at">@</span><span class="host">site</span><span class="path"> ~</span><span class="sym"> %</span><span class="cmd"> <span class="cmd-text">whoami</span></span><span class="cursor"></span></div>
-    <h1 class="whoami-name">evgeniimatveev<span class="glint" aria-hidden="true"></span></h1>
+    <h1 class="whoami-name">evgeniimatveev</h1>
     <div class="whoami-role">Analytics &amp; MLOps Engineer</div>
     <div class="whoami-loc">Burbank, CA</div>
     <div class="whoami-stack">
