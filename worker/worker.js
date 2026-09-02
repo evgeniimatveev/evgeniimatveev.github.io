@@ -44,6 +44,42 @@ function detectScriptHint(text) {
   return null;
 }
 
+// Lightweight script-based language tag for analytics — same ranges as
+// detectScriptHint, just returned as a short code instead of an instruction.
+// Anything outside these scripts (incl. Latin-script languages other than
+// English) is bucketed as "en" — coarse on purpose, this is a stats widget,
+// not a language detector.
+function detectLanguage(text) {
+  if (/[一-鿿]/.test(text)) return "zh";
+  if (/[぀-ヿ]/.test(text)) return "ja";
+  if (/[가-힯]/.test(text)) return "ko";
+  if (/[Ѐ-ӿ]/.test(text)) return "ru";
+  if (/[؀-ۿ]/.test(text)) return "ar";
+  if (/[฀-๿]/.test(text)) return "th";
+  if (/[֐-׿]/.test(text)) return "he";
+  return "en";
+}
+
+// Keyword-based topic tag for analytics — cheap (no extra model call),
+// checked most-specific-first since a question can match multiple buckets.
+// Coarse by design (see project notes): this is a public "top topic" stat,
+// not an analytical product, so a rough bucket is good enough.
+const TOPIC_RULES = [
+  ["incident", /\b(incident|outage|bug|debug|production|postmortem|root cause)\b/i],
+  ["sql-dbt", /\b(sql|dbt|query|queries|database|postgres|snowflake|duckdb|schema)\b/i],
+  ["stack", /\b(stack|tech stack|tool|python|docker|mlflow|streamlit|fastapi|airflow|cloudflare|worker)\b/i],
+  ["logistics", /\b(visa|relocat|sponsor|work auth|remote|onsite|salary|rate|hire|available)\b/i],
+  ["projects", /\b(project|portfolio|github|repo|demo|built|build)\b/i],
+  ["career", /\b(why|leaving|motivation|background|experience|career|job search)\b/i],
+];
+
+function classifyTopic(text) {
+  for (const [topic, pattern] of TOPIC_RULES) {
+    if (pattern.test(text)) return topic;
+  }
+  return "other";
+}
+
 async function embed(env, text) {
   const res = await env.AI.run(EMBEDDING_MODEL, { text: [text] });
   return res.data[0];
@@ -141,22 +177,49 @@ async function handleAsk(request, env, ctx, cors) {
     .trim();
 
   const newTotal = totalCount + 1;
+  const topic = classifyTopic(question);
+  const language = detectLanguage(question);
+  // allSettled, not all: if any one write rejects, Promise.all would settle
+  // (reject) immediately without waiting for the others, and Cloudflare can
+  // then end the request's extended lifetime before the stragglers finish —
+  // silently dropping a KV/D1 write. allSettled always waits for everything.
   ctx.waitUntil(
-    Promise.all([
+    Promise.allSettled([
       env.RATE_LIMIT.put(ipKey, String(ipCount + 1), { expirationTtl: KV_TTL_SECONDS }),
       env.RATE_LIMIT.put(globalKey, String(globalCount + 1), { expirationTtl: KV_TTL_SECONDS }),
       env.RATE_LIMIT.put(TOTAL_KEY, String(newTotal)), // no TTL — persists indefinitely
+      env.DB.prepare(
+        "INSERT INTO questions (topic, language, created_at) VALUES (?, ?, ?)"
+      ).bind(topic, language, new Date().toISOString()).run(),
     ])
   );
 
   return json({ answer, total: newTotal }, 200, cors);
 }
 
-// Public, unauthenticated, read-only — just the running "questions answered"
-// counter so the frontend can show it without spending a rate-limited ask.
+// Public, unauthenticated, read-only — the running "questions answered"
+// counter plus a topic/language breakdown, so the frontend can show both
+// without spending a rate-limited ask. Breakdown starts from the day D1
+// analytics shipped — no historical backfill, the KV counter predates it.
 async function handleStats(env, cors) {
   const totalStr = await env.RATE_LIMIT.get(TOTAL_KEY);
-  return json({ total: parseInt(totalStr || "0", 10) }, 200, cors);
+  const [topicsResult, languagesResult] = await Promise.all([
+    env.DB.prepare(
+      "SELECT topic, COUNT(*) as count FROM questions GROUP BY topic ORDER BY count DESC LIMIT 5"
+    ).all(),
+    env.DB.prepare(
+      "SELECT language, COUNT(*) as count FROM questions GROUP BY language ORDER BY count DESC LIMIT 5"
+    ).all(),
+  ]);
+  return json(
+    {
+      total: parseInt(totalStr || "0", 10),
+      topics: topicsResult.results || [],
+      languages: languagesResult.results || [],
+    },
+    200,
+    cors
+  );
 }
 
 // One-off / re-runnable ingestion endpoint. Protected by ADMIN_KEY (a secret this

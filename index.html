@@ -488,6 +488,11 @@
     box-shadow:0 0 6px var(--accent-soft); flex-shrink:0; animation:pulse 2.6s ease-in-out infinite;
   }
   @media (prefers-reduced-motion: reduce){ .ask-counter .dot{ animation:none; } }
+  .ask-topic-note{
+    font-family:var(--mono-ui); font-size:11px; color:var(--text-faint);
+    margin:-12px 0 16px; opacity:0; transition:opacity .4s ease;
+  }
+  .ask-topic-note.is-visible{ opacity:1; }
 
   /* ---------- interactive skills tree ---------- */
   .tree-layer{ cursor:default; border-radius:2px; transition:background .15s ease; }
@@ -548,6 +553,7 @@
     <span class="ask-badge">★ ask in any language — RAG-grounded, not a chatbot script</span>
     <p class="stat-note">answers in your language, pulled from 300+ real facts — 33 repos, incident postmortems, interview stories — via Vectorize + Workers AI, generated live by Claude (Haiku 4.5)</p>
     <p class="ask-counter" id="askCounter"><span class="dot"></span><span id="askCounterText">loading question count…</span></p>
+    <p class="ask-topic-note" id="askTopicNote"></p>
     <div class="ask-box">
       <div id="ask-log" class="ask-log"></div>
       <div id="ask-chips" class="ask-chips">
@@ -1139,10 +1145,19 @@
     var askChips = document.getElementById('ask-chips');
     var askCounter = document.getElementById('askCounter');
     var askCounterText = document.getElementById('askCounterText');
+    var askTopicNote = document.getElementById('askTopicNote');
     if(!askForm || !askInput || !askLog) return;
     var askSubmit = askForm.querySelector('.ask-submit');
     var askedCount = 0;
     var shownTotal = 0;
+
+    // Coarse keyword-classified buckets (see worker/worker.js TOPIC_RULES) —
+    // friendlier labels for the same slugs, no new data needed.
+    var TOPIC_LABELS = {
+      'sql-dbt': 'SQL / dbt', 'stack': 'stack & tools', 'career': 'career & motivation',
+      'incident': 'real incidents', 'logistics': 'logistics & availability',
+      'projects': 'projects', 'other': 'general'
+    };
 
     function showAskCounter(total){
       if(!askCounterText || typeof total !== 'number') return;
@@ -1158,11 +1173,26 @@
       if(askCounter) askCounter.classList.add('is-visible');
     }
 
-    if(ASK_ENDPOINT){
+    function showTopicNote(topics){
+      if(!askTopicNote || !topics || !topics.length) return;
+      var top = topics[0];
+      var label = TOPIC_LABELS[top.topic] || top.topic;
+      askTopicNote.textContent = 'top topic so far: ' + label;
+      askTopicNote.classList.add('is-visible');
+    }
+
+    function refreshStats(){
+      if(!ASK_ENDPOINT) return;
       fetch(ASK_STATS_ENDPOINT).then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(data){ if(data && typeof data.total === 'number') showAskCounter(data.total); })
+        .then(function(data){
+          if(!data) return;
+          if(typeof data.total === 'number') showAskCounter(data.total);
+          showTopicNote(data.topics);
+        })
         .catch(function(){});
     }
+
+    refreshStats();
 
     if(!ASK_ENDPOINT){
       askHint.textContent = 'ask is warming up — email works meanwhile: evgeniimatveevusa@gmail.com';
@@ -1208,6 +1238,7 @@
         if(result.ok && result.data && result.data.answer){
           aEl.textContent = result.data.answer;
           if(typeof result.data.total === 'number') showAskCounter(result.data.total);
+          refreshStats(); // ask response doesn't carry the topic breakdown — one light re-fetch
         } else if(result.data && result.data.error === 'rate_limited'){
           aEl.classList.add('err');
           aEl.textContent = 'rate limit hit — try again tomorrow, or just email me.';
