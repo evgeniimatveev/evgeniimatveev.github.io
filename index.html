@@ -1173,11 +1173,19 @@
       if(askCounter) askCounter.classList.add('is-visible');
     }
 
-    function showTopicNote(topics){
+    function showTopicNote(topics, languages){
       if(!askTopicNote || !topics || !topics.length) return;
-      var top = topics[0];
-      var label = TOPIC_LABELS[top.topic] || top.topic;
-      askTopicNote.textContent = 'top topic so far: ' + label;
+      var parts = topics.slice(0, 3).map(function(t){
+        var label = TOPIC_LABELS[t.topic] || t.topic;
+        return label + ' (' + t.count + ')';
+      });
+      var text = 'top topics: ' + parts.join(' · ');
+      // Only worth a mention once it's genuinely plural — a real signal that
+      // the multilingual RAG setup is getting used, not just a stray non-English test.
+      if(languages && languages.length > 1){
+        text += ' — asked in ' + languages.length + ' languages so far';
+      }
+      askTopicNote.textContent = text;
       askTopicNote.classList.add('is-visible');
     }
 
@@ -1187,7 +1195,7 @@
         .then(function(data){
           if(!data) return;
           if(typeof data.total === 'number') showAskCounter(data.total);
-          showTopicNote(data.topics);
+          showTopicNote(data.topics, data.languages);
         })
         .catch(function(){});
     }
