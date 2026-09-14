@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-09-14",
+    "summary": "Weekly benchmarks and data refreshes shipped across ML pipeline, layoffs tracker, and job market reporting systems."
+  },
+  {
     "date": "2026-09-13",
     "summary": "Generated 2026-09-12 market report for job-market-pulse; updated portfolio uptime snapshots and AI changelog."
   },
