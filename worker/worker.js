@@ -9,6 +9,8 @@ const GLOBAL_DAILY_LIMIT = 250;
 const KV_TTL_SECONDS = 172800; // 2 days — safe buffer past the UTC day boundary
 const TOTAL_KEY = "total:questions"; // no TTL — running counter since this key was introduced
 
+const CF_ACCOUNT_ID = "cde67b17e30ac60d7f6c340bd3e22f82"; // not a secret — same id used in R2/D1 URLs elsewhere
+
 const EMBEDDING_MODEL = "@cf/baai/bge-m3";
 const TOP_K = 6;
 const MIN_SCORE = 0.3; // below this, a retrieved chunk is probably irrelevant noise
@@ -211,6 +213,20 @@ async function handleAsk(request, env, ctx, cors) {
   const newTotal = totalCount + 1;
   const topic = classifyTopic(question);
   const language = detectLanguage(question);
+
+  // Analytics Engine: writeDataPoint() is synchronous (queues the point,
+  // doesn't return a promise) — no ctx.waitUntil needed. Feeds the /stats
+  // "questions per day" trend below; double1=1 per event so SUM(double1)
+  // gives a count, resilient to Analytics Engine's adaptive sampling at
+  // higher volumes than this site actually sees.
+  if (env.ASK_ANALYTICS) {
+    env.ASK_ANALYTICS.writeDataPoint({
+      blobs: [topic, language],
+      doubles: [1],
+      indexes: [topic],
+    });
+  }
+
   // allSettled, not all: if any one write rejects, Promise.all would settle
   // (reject) immediately without waiting for the others, and Cloudflare can
   // then end the request's extended lifetime before the stragglers finish —
@@ -229,25 +245,59 @@ async function handleAsk(request, env, ctx, cors) {
   return json({ answer, total: newTotal }, 200, cors);
 }
 
+// Queries the Analytics Engine SQL API (a separate authenticated REST call —
+// the ASK_ANALYTICS binding can only write, not read) for a daily question
+// count over the last 30 days. Best-effort: any failure (missing token,
+// dataset not yet created because nothing's been written to it, network
+// error) just returns an empty trend rather than breaking /stats.
+async function queryDailyTrend(env) {
+  if (!env.CF_ANALYTICS_API_TOKEN) return [];
+  const sql =
+    "SELECT toStartOfInterval(timestamp, INTERVAL '1' DAY) AS day, SUM(_sample_interval * double1) AS count " +
+    "FROM ask_questions WHERE timestamp >= NOW() - INTERVAL '30' DAY GROUP BY day ORDER BY day ASC";
+  try {
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/analytics_engine/sql`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${env.CF_ANALYTICS_API_TOKEN}` },
+        body: sql,
+      }
+    );
+    if (!res.ok) return [];
+    const result = await res.json();
+    return (result.data || []).map((row) => ({
+      date: String(row.day).slice(0, 10),
+      count: Math.round(row.count),
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
 // Public, unauthenticated, read-only — the running "questions answered"
 // counter plus a topic/language breakdown, so the frontend can show both
 // without spending a rate-limited ask. Breakdown starts from the day D1
 // analytics shipped — no historical backfill, the KV counter predates it.
+// `trend` (Analytics Engine) starts from whenever the first writeDataPoint
+// landed — same no-backfill deal.
 async function handleStats(env, cors) {
   const totalStr = await env.RATE_LIMIT.get(TOTAL_KEY);
-  const [topicsResult, languagesResult] = await Promise.all([
+  const [topicsResult, languagesResult, trend] = await Promise.all([
     env.DB.prepare(
       "SELECT topic, COUNT(*) as count FROM questions GROUP BY topic ORDER BY count DESC LIMIT 5"
     ).all(),
     env.DB.prepare(
       "SELECT language, COUNT(*) as count FROM questions GROUP BY language ORDER BY count DESC LIMIT 5"
     ).all(),
+    queryDailyTrend(env),
   ]);
   return json(
     {
       total: parseInt(totalStr || "0", 10),
       topics: topicsResult.results || [],
       languages: languagesResult.results || [],
+      trend,
     },
     200,
     cors

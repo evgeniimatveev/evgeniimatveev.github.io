@@ -29,7 +29,14 @@ max_batch_timeout = 5
 max_retries = 3
 dead_letter_queue = "rag-ingest-dlq"
 
+[[analytics_engine_datasets]]
+binding = "ASK_ANALYTICS"
+dataset = "ask_questions"
+
 # Secrets (set via `wrangler secret put <NAME>`, not stored here):
 #   ANTHROPIC_API_KEY — Anthropic API key used for the ask widget's answers
 #   ADMIN_KEY          — internal token gating the /admin/ingest and /admin/enqueue-ingest routes
 #   TURNSTILE_SECRET_KEY — Turnstile widget's Secret key (not the Site key), verifies the ask-widget's public endpoint
+#   CF_ANALYTICS_API_TOKEN — Cloudflare API token (Account Analytics:Read scope) used to query the
+#                            Analytics Engine SQL API for the /stats trend — the ASK_ANALYTICS binding
+#                            above can only write, reading requires this separate authenticated REST call

@@ -20,6 +20,7 @@ Routes on the same Worker:
 - `POST /admin/ingest` — (re)embeds and upserts corpus chunks into Vectorize **synchronously** (one HTTP request per batch, client waits). Gated by `ADMIN_KEY`, not Origin-restricted. Kept for one-off debugging of a single chunk.
 - `POST /admin/enqueue-ingest` — the normal path for bulk (re)ingestion: pushes each chunk onto the `rag-ingest` Cloudflare Queue and returns immediately. The Worker's `queue()` export consumes it asynchronously (embed + upsert), with automatic retry (`max_retries=3`, see `wrangler.toml`) on transient failures and a `rag-ingest-dlq` dead letter queue for anything that still fails after retries — no more re-running the whole script by hand after a transient 403/timeout.
 - `POST /admin/debug-query` — returns raw Vectorize matches (no Claude call), for inspecting retrieval quality in isolation. Also gated by `ADMIN_KEY`.
+- `GET /stats` — public, unauthenticated. Total questions (KV), top topics/languages (D1), and a `trend` array (Analytics Engine — daily question counts over the last 30 days, queried via the Analytics Engine SQL API on every request; empty if `CF_ANALYTICS_API_TOKEN` isn't set or the query fails, so this never breaks the rest of `/stats`).
 
 ## Deploy
 
@@ -47,16 +48,21 @@ npx wrangler login     # opens an OAuth consent screen in the browser
    ```
    The Turnstile **Site key** (public) goes in `index.html`'s `TURNSTILE_SITE_KEY` constant, not here.
 
-3. Deploy:
+3. Enable [Analytics Engine](https://dash.cloudflare.com/?to=/:account/workers/analytics-engine) on the account (one-time, dashboard-only — no wrangler command for this), create a dataset named `ask_questions` bound as `ASK_ANALYTICS` (also only doable from that same dashboard page), then create an [API token](https://dash.cloudflare.com/profile/api-tokens) with **Account → Account Analytics → Read** (this is separate from the Worker's own binding, which can write but not read — the `/stats` trend queries Cloudflare's Analytics Engine SQL API directly over HTTPS):
+   ```bash
+   npx wrangler secret put CF_ANALYTICS_API_TOKEN
+   ```
+
+4. Deploy:
    ```bash
    npx wrangler deploy
    ```
    This prints the live URL, e.g. `https://evgeniimatveev-ask.<subdomain>.workers.dev`.
 
-4. Paste that URL into `ASK_ENDPOINT` near the bottom of `index.html`'s
+5. Paste that URL into `ASK_ENDPOINT` near the bottom of `index.html`'s
    `<script>` block, commit, push.
 
-5. Build and load the corpus (see `rag/` below).
+6. Build and load the corpus (see `rag/` below).
 
 ## Updating the knowledge base (`rag/`)
 
