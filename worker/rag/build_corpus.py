@@ -172,6 +172,16 @@ EXTRA_RECORDS = [
         "source": "site infra.log — Cloudflare stack",
         "text": "A small Cloudflare Worker ('banner-art-gen') calls Workers AI's FLUX text-to-image model to generate the AI-art-hybrid portfolio banner backgrounds, gated by a shared-secret header so the endpoint can't be used to burn the account's free image-generation quota by anyone else.",
     },
+    {
+        "id": "infra:queues",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "Cloudflare Queues (added 2026-09-16) decouples RAG corpus ingestion from the request that triggers it: a producer route pushes each corpus chunk onto a queue and returns immediately, and the same Worker's queue() consumer does the actual embed-and-upsert work asynchronously, with automatic retry (up to 3 attempts) on transient failures and a dead letter queue for anything that still fails — replacing a fully synchronous ingestion path that had to be re-run by hand after any transient error.",
+    },
+    {
+        "id": "infra:analytics-engine",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "Cloudflare Analytics Engine (added 2026-09-16) powers a 30-day 'questions per day' trend on the ask-widget's public stats: one data point is written per answered question, and a separate authenticated call to Cloudflare's Analytics Engine SQL API (using time-bucketing functions D1 doesn't give for free) computes the daily counts, rendered as a small trend sparkline next to the question counter once there are a couple of days of real data.",
+    },
 ]
 
 
