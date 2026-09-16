@@ -147,6 +147,31 @@ EXTRA_RECORDS = [
         "source": "site infra.log",
         "text": "Every repo runs its pytest suite in GitHub Actions before anything ships — routing feasibility, capacity limits, time-window compliance, and optimized actually beats baseline are all asserted, not eyeballed.",
     },
+    {
+        "id": "infra:cloudflare-stack",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "This site's own ask-widget is a real Cloudflare backend, not a static page: a Cloudflare Worker proxies each question through Workers AI (bge-m3 embeddings) into Vectorize for semantic search over a corpus of READMEs, STAR interview stories, and case studies, then Claude Haiku 4.5 generates the grounded answer. Per-IP and global daily rate limits are enforced via Workers KV. This is deliberately the one backend-y piece of the portfolio — schema design, a real write path, an actual API contract — versus the mostly-Streamlit/DuckDB read-only dashboards elsewhere in the portfolio.",
+    },
+    {
+        "id": "infra:turnstile",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "Added Cloudflare Turnstile (2026-09-16) as bot protection on the ask-widget's public endpoint. The Worker verifies the visitor's Turnstile token against Cloudflare's siteverify API before touching any rate-limit KV read or write, so scripted hammering gets rejected before it can eat into the daily ask budget. Runs in Managed mode with invisible execute-on-demand on the frontend — a real visitor never sees a checkbox or challenge, only high-risk traffic would.",
+    },
+    {
+        "id": "infra:d1-analytics",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "A Cloudflare D1 database (SQLite at the edge) logs a topic and language for every question asked through the ask-widget — no raw question text stored, by design, for visitor privacy. Topic is classified by cheap keyword rules (incident, sql-dbt, stack, logistics, projects, career), not an extra model call. Powers a public '/stats' endpoint showing top topics and how many languages the widget has been asked in, rendered live on the site.",
+    },
+    {
+        "id": "infra:r2-storage",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "Cloudflare R2 (S3-compatible object storage, zero egress fees) replaced per-project Hugging Face Datasets as shared storage for portfolio projects' DuckDB files — weather-pipeline and job-market-pulse both write their database file there now via boto3, one shared bucket with per-project key prefixes.",
+    },
+    {
+        "id": "infra:workers-ai-image-gen",
+        "source": "site infra.log — Cloudflare stack",
+        "text": "A small Cloudflare Worker ('banner-art-gen') calls Workers AI's FLUX text-to-image model to generate the AI-art-hybrid portfolio banner backgrounds, gated by a shared-secret header so the endpoint can't be used to burn the account's free image-generation quota by anyone else.",
+    },
 ]
 
 
