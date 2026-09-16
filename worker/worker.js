@@ -85,6 +85,31 @@ async function embed(env, text) {
   return res.data[0];
 }
 
+// Verifies a Turnstile token against Cloudflare's siteverify endpoint. Checked
+// before the rate-limit KV reads/writes below so a bot with no/bad token never
+// eats into the per-IP or global daily budget.
+async function verifyTurnstile(token, ip, env) {
+  if (!token) return false;
+  const form = new URLSearchParams();
+  form.append("secret", env.TURNSTILE_SECRET_KEY);
+  form.append("response", token);
+  if (ip && ip !== "unknown") form.append("remoteip", ip);
+  try {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const data = await res.json();
+    return data.success === true;
+  } catch (e) {
+    // Cloudflare's own verify endpoint being unreachable shouldn't lock out
+    // every real visitor — fail open here, the per-IP/global rate limits are
+    // still the hard backstop against abuse.
+    return true;
+  }
+}
+
 async function handleAsk(request, env, ctx, cors) {
   let body;
   try {
@@ -99,6 +124,13 @@ async function handleAsk(request, env, ctx, cors) {
   }
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+
+  const turnstileToken = body && body.turnstileToken ? String(body.turnstileToken) : "";
+  const humanVerified = await verifyTurnstile(turnstileToken, ip, env);
+  if (!humanVerified) {
+    return json({ error: "bot_check_failed" }, 403, cors);
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   const ipKey = `ip:${ip}:${today}`;
   const globalKey = `global:${today}`;

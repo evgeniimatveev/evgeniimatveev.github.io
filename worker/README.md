@@ -16,7 +16,7 @@ question --> embed (Workers AI, bge-base-en-v1.5) --> Vectorize.query(topK=5)
 ```
 
 Two routes on the same Worker:
-- `POST /` — the ask endpoint (Origin-restricted to the portfolio site, rate-limited).
+- `POST /` — the ask endpoint (Origin-restricted to the portfolio site, rate-limited, Turnstile-verified before any rate-limit KV read/write).
 - `POST /admin/ingest` — (re)embeds and upserts corpus chunks into Vectorize. Gated by the `ADMIN_KEY` secret, not Origin-restricted (called from a local script).
 - `POST /admin/debug-query` — returns raw Vectorize matches (no Claude call), for inspecting retrieval quality in isolation. Also gated by `ADMIN_KEY`.
 
@@ -36,11 +36,13 @@ npx wrangler login     # opens an OAuth consent screen in the browser
    ```
    Paste the returned KV `id` into `wrangler.toml` (the Vectorize binding just needs the index name, already set).
 
-2. Set secrets:
+2. Create a [Turnstile widget](https://dash.cloudflare.com/?to=/:account/turnstile) (Managed mode, hostname = the site's domain) and set secrets:
    ```bash
    npx wrangler secret put ANTHROPIC_API_KEY   # your Anthropic key
    npx wrangler secret put ADMIN_KEY           # any random string you generate yourself — gates /admin/* routes
+   npx wrangler secret put TURNSTILE_SECRET_KEY  # Turnstile widget's Secret key (not the Site key)
    ```
+   The Turnstile **Site key** (public) goes in `index.html`'s `TURNSTILE_SITE_KEY` constant, not here.
 
 3. Deploy:
    ```bash

@@ -569,6 +569,7 @@
         <button type="submit" class="ask-submit">send</button>
       </form>
       <div id="ask-hint" class="ask-hint">a few questions per visit · rate-limited to keep this running for everyone</div>
+      <div id="turnstile-container" style="position:absolute;width:0;height:0;overflow:hidden;"></div>
     </div>
   </section>
 
@@ -1022,6 +1023,7 @@
 
 </main>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
   function tick(){
     var el = document.getElementById('clock');
@@ -1136,6 +1138,9 @@
   var ASK_ENDPOINT = 'https://evgeniimatveev-ask.evgeniimatveevusa.workers.dev/';
   var ASK_STATS_ENDPOINT = ASK_ENDPOINT.replace(/\/$/, '') + '/stats';
   var ASK_MAX_PER_VISIT = 6;
+  // Turnstile site key (public — safe to ship in frontend JS, pairs with the
+  // TURNSTILE_SECRET_KEY worker secret which does the real verification).
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAE5IegwVZUKTHuJn';
 
   (function initAsk(){
     var askForm = document.getElementById('ask-form');
@@ -1206,6 +1211,37 @@
       askHint.textContent = 'ask is warming up — email works meanwhile: evgeniimatveevusa@gmail.com';
     }
 
+    // Turnstile: one invisible widget instance, re-executed per question since
+    // each token is single-use. 'execution: execute' means it stays dormant
+    // until getTurnstileToken() calls turnstile.execute() below — it never
+    // auto-runs (and never shows anything) on page load.
+    var turnstileWidgetId = null;
+    var turnstileResolve = null;
+    var turnstileReject = null;
+
+    function ensureTurnstileWidget(){
+      if(turnstileWidgetId !== null || typeof turnstile === 'undefined') return;
+      turnstileWidgetId = turnstile.render('#turnstile-container', {
+        sitekey: TURNSTILE_SITE_KEY,
+        execution: 'execute',
+        callback: function(token){ if(turnstileResolve) turnstileResolve(token); },
+        'error-callback': function(){ if(turnstileReject) turnstileReject(new Error('turnstile_error')); },
+        'timeout-callback': function(){ if(turnstileReject) turnstileReject(new Error('turnstile_timeout')); }
+      });
+    }
+
+    function getTurnstileToken(){
+      return new Promise(function(resolve, reject){
+        if(typeof turnstile === 'undefined'){ reject(new Error('turnstile_unavailable')); return; }
+        ensureTurnstileWidget();
+        turnstileResolve = resolve;
+        turnstileReject = reject;
+        try { turnstile.reset(turnstileWidgetId); } catch(e){}
+        turnstile.execute(turnstileWidgetId);
+        setTimeout(function(){ reject(new Error('turnstile_slow')); }, 8000);
+      });
+    }
+
     function sendQuestion(q){
       if(!q) return;
       if(!ASK_ENDPOINT){
@@ -1233,10 +1269,12 @@
       askLog.appendChild(aEl);
       askLog.scrollTop = askLog.scrollHeight;
 
-      fetch(ASK_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q })
+      getTurnstileToken().catch(function(){ return ''; }).then(function(turnstileToken){
+        return fetch(ASK_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q, turnstileToken: turnstileToken })
+        });
       }).then(function(res){
         return res.json().catch(function(){ return {}; }).then(function(data){
           return { ok: res.ok, data: data };
@@ -1250,6 +1288,9 @@
         } else if(result.data && result.data.error === 'rate_limited'){
           aEl.classList.add('err');
           aEl.textContent = 'rate limit hit — try again tomorrow, or just email me.';
+        } else if(result.data && result.data.error === 'bot_check_failed'){
+          aEl.classList.add('err');
+          aEl.textContent = 'bot check failed — reload the page and try again, or just email me.';
         } else {
           aEl.classList.add('err');
           aEl.textContent = 'ask is offline right now — email works: evgeniimatveevusa@gmail.com';
