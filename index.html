@@ -489,6 +489,7 @@
   }
   @media (prefers-reduced-motion: reduce){ .ask-counter .dot{ animation:none; } }
   .ask-trend-spark{ width:64px; height:16px; margin-left:2px; flex-shrink:0; overflow:visible; }
+  .ask-trend-spark.is-hidden{ display:none; }
   .ask-trend-spark path{ fill:none; stroke:var(--accent); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
   .ask-topic-note{
     font-family:var(--mono-ui); font-size:11px; color:var(--text-faint);
@@ -554,7 +555,7 @@
     <p class="ask-cta">Ask anything you need to know — my stack, a real incident, why I'm job searching, logistics. Grounded in my real work, not scripted.</p>
     <span class="ask-badge">★ ask in any language — RAG-grounded, not a chatbot script</span>
     <p class="stat-note">answers in your language, pulled from 300+ real facts — 33 repos, incident postmortems, interview stories — via Vectorize + Workers AI, generated live by Claude (Haiku 4.5)</p>
-    <p class="ask-counter" id="askCounter"><span class="dot"></span><span id="askCounterText">loading question count…</span><svg id="askTrendSpark" class="ask-trend-spark" viewBox="0 0 120 24" preserveAspectRatio="none" hidden></svg></p>
+    <p class="ask-counter" id="askCounter"><span class="dot"></span><span id="askCounterText">loading question count…</span><svg id="askTrendSpark" class="ask-trend-spark is-hidden" viewBox="0 0 120 24" preserveAspectRatio="none"></svg></p>
     <p class="ask-topic-note" id="askTopicNote"></p>
     <div class="ask-box">
       <div id="ask-log" class="ask-log"></div>
@@ -1197,7 +1198,7 @@
       });
       var d = points.map(function(p, i){ return (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
       askTrendSpark.innerHTML = '<path d="' + d + '"></path>';
-      askTrendSpark.hidden = false;
+      askTrendSpark.classList.remove('is-hidden');
     }
 
     function showTopicNote(topics, languages){
