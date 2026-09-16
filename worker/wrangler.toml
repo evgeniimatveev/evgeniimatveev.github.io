@@ -18,6 +18,18 @@ database_id = "d46a94ac-25b4-498d-8897-915ffba50750"
 [ai]
 binding = "AI"
 
+[[queues.producers]]
+queue = "rag-ingest"
+binding = "RAG_INGEST_QUEUE"
+
+[[queues.consumers]]
+queue = "rag-ingest"
+max_batch_size = 10
+max_batch_timeout = 5
+max_retries = 3
+dead_letter_queue = "rag-ingest-dlq"
+
 # Secrets (set via `wrangler secret put <NAME>`, not stored here):
 #   ANTHROPIC_API_KEY — Anthropic API key used for the ask widget's answers
-#   ADMIN_KEY          — internal token gating the /admin/ingest route
+#   ADMIN_KEY          — internal token gating the /admin/ingest and /admin/enqueue-ingest routes
+#   TURNSTILE_SECRET_KEY — Turnstile widget's Secret key (not the Site key), verifies the ask-widget's public endpoint

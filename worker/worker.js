@@ -289,6 +289,71 @@ async function handleIngest(request, env, cors) {
   return json({ upserted: vectors.length }, 200, cors);
 }
 
+// Producer side of the async ingestion path: accepts the same {chunks:[...]}
+// body as /admin/ingest, but instead of embedding synchronously (slow, and a
+// single transient failure — e.g. a Vectorize/AI hiccup — forces re-running
+// the whole batch by hand), it just enqueues each chunk and returns
+// immediately. The queue() consumer below does the actual embed+upsert work,
+// with Cloudflare handling retries automatically.
+async function handleEnqueueIngest(request, env, cors) {
+  const adminKey = request.headers.get("X-Admin-Key") || "";
+  if (!env.ADMIN_KEY || adminKey !== env.ADMIN_KEY) {
+    return json({ error: "forbidden" }, 403, cors);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return json({ error: "bad_request" }, 400, cors);
+  }
+
+  const chunks = Array.isArray(body.chunks) ? body.chunks : [];
+  if (chunks.length === 0) {
+    return json({ error: "no_chunks" }, 400, cors);
+  }
+
+  // Queues' sendBatch caps at 100 messages per call — chunk accordingly.
+  const SEND_BATCH_SIZE = 100;
+  for (let i = 0; i < chunks.length; i += SEND_BATCH_SIZE) {
+    const slice = chunks.slice(i, i + SEND_BATCH_SIZE);
+    await env.RAG_INGEST_QUEUE.sendBatch(slice.map((c) => ({ body: c })));
+  }
+
+  return json({ enqueued: chunks.length }, 200, cors);
+}
+
+// Consumer: Cloudflare invokes this automatically as messages accumulate
+// (wrangler.toml: max_batch_size=10, max_batch_timeout=5s — whichever hits
+// first), completely decoupled from the /admin/enqueue-ingest request that
+// queued them. Embed failures retry just that one message; an upsert
+// failure retries every message that made it into this batch's vectors —
+// after max_retries (3), Cloudflare routes them to the rag-ingest-dlq dead
+// letter queue instead of dropping them silently.
+async function queue(batch, env, ctx) {
+  const vectors = [];
+  const embedded = [];
+  for (const message of batch.messages) {
+    try {
+      const chunk = message.body;
+      const vec = await embed(env, chunk.text);
+      vectors.push({ id: chunk.id, values: vec, metadata: { source: chunk.source, text: chunk.text } });
+      embedded.push(message);
+    } catch (e) {
+      message.retry();
+    }
+  }
+
+  if (vectors.length === 0) return;
+
+  try {
+    await env.VECTORIZE.upsert(vectors);
+    for (const message of embedded) message.ack();
+  } catch (e) {
+    for (const message of embedded) message.retry();
+  }
+}
+
 // Debug route — returns raw Vectorize matches (no Claude call) so retrieval
 // quality can be inspected in isolation from generation.
 async function handleDebugQuery(request, env, cors) {
@@ -344,6 +409,9 @@ export default {
       // Admin route: no Origin restriction (called from a local script, not the browser).
       return handleIngest(request, env, cors);
     }
+    if (url.pathname === "/admin/enqueue-ingest") {
+      return handleEnqueueIngest(request, env, cors);
+    }
     if (url.pathname === "/admin/debug-query") {
       return handleDebugQuery(request, env, cors);
     }
@@ -354,4 +422,5 @@ export default {
 
     return handleAsk(request, env, ctx, cors);
   },
+  queue,
 };

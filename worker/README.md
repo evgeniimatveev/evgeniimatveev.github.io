@@ -15,9 +15,10 @@ question --> embed (Workers AI, bge-base-en-v1.5) --> Vectorize.query(topK=5)
           --> STATIC_IDENTITY + CONTEXT --> Claude Haiku --> answer
 ```
 
-Two routes on the same Worker:
+Routes on the same Worker:
 - `POST /` — the ask endpoint (Origin-restricted to the portfolio site, rate-limited, Turnstile-verified before any rate-limit KV read/write).
-- `POST /admin/ingest` — (re)embeds and upserts corpus chunks into Vectorize. Gated by the `ADMIN_KEY` secret, not Origin-restricted (called from a local script).
+- `POST /admin/ingest` — (re)embeds and upserts corpus chunks into Vectorize **synchronously** (one HTTP request per batch, client waits). Gated by `ADMIN_KEY`, not Origin-restricted. Kept for one-off debugging of a single chunk.
+- `POST /admin/enqueue-ingest` — the normal path for bulk (re)ingestion: pushes each chunk onto the `rag-ingest` Cloudflare Queue and returns immediately. The Worker's `queue()` export consumes it asynchronously (embed + upsert), with automatic retry (`max_retries=3`, see `wrangler.toml`) on transient failures and a `rag-ingest-dlq` dead letter queue for anything that still fails after retries — no more re-running the whole script by hand after a transient 403/timeout.
 - `POST /admin/debug-query` — returns raw Vectorize matches (no Claude call), for inspecting retrieval quality in isolation. Also gated by `ADMIN_KEY`.
 
 ## Deploy
@@ -29,12 +30,14 @@ npm install wrangler   # local install, no -g needed
 npx wrangler login     # opens an OAuth consent screen in the browser
 ```
 
-1. Create the KV namespace and Vectorize index:
+1. Create the KV namespace, Vectorize index, and Queues:
    ```bash
    npx wrangler kv namespace create RATE_LIMIT
    npx wrangler vectorize create evgeniimatveev-corpus --dimensions=768 --metric=cosine
+   npx wrangler queues create rag-ingest
+   npx wrangler queues create rag-ingest-dlq
    ```
-   Paste the returned KV `id` into `wrangler.toml` (the Vectorize binding just needs the index name, already set).
+   Paste the returned KV `id` into `wrangler.toml` (the Vectorize and Queues bindings just need the resource names, already set).
 
 2. Create a [Turnstile widget](https://dash.cloudflare.com/?to=/:account/turnstile) (Managed mode, hostname = the site's domain) and set secrets:
    ```bash
@@ -60,7 +63,7 @@ npx wrangler login     # opens an OAuth consent screen in the browser
 - `rag/readmes/` — cached READMEs of all public repos (regenerate with `gh api repos/evgeniimatveev/<repo>/readme -H "Accept: application/vnd.github.raw" > rag/readmes/<repo>.md`).
 - `rag/star_stories.json` — curated STAR interview stories extracted from the private interview-prep doc. **Only achievement-focused stories** — never include "weaknesses", "why looking for a new role", or other coaching-only content; those aren't for a public bot.
 - `rag/build_corpus.py` — cleans (strips badges/HTML/markdown noise) and chunks everything (split by header, ~180 words/chunk) into `rag/corpus.jsonl`. Also has a hardcoded `EXTRA_RECORDS` list for bio facts / site case studies — edit there for one-off additions.
-- `rag/ingest.py` — reads `corpus.jsonl` and POSTs it in batches to `/admin/ingest`.
+- `rag/ingest.py` — reads `corpus.jsonl` and POSTs it in batches to `/admin/enqueue-ingest` (queued, async — see Architecture above).
 
 To refresh the whole knowledge base after editing sources:
 ```bash
@@ -68,7 +71,11 @@ cd rag
 python build_corpus.py
 ADMIN_KEY=<your admin key> python ingest.py
 ```
-Upserts are idempotent by `id` — re-running is always safe.
+Upserts are idempotent by `id` — re-running is always safe. Since ingestion is now queued, `ingest.py` finishing just means everything was *enqueued*, not that it's in Vectorize yet — allow a minute or two, then spot-check with:
+```bash
+npx wrangler vectorize get-vectors evgeniimatveev-corpus-m3 --ids <some-id>
+```
+(Vectorize reads are eventually consistent — an empty result seconds after ingest doesn't mean it failed.)
 
 To debug why a question retrieves the wrong context:
 ```bash
