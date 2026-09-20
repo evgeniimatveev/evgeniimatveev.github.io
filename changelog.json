@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-09-20",
+    "summary": "Job market report generated for 2026-09-19; portfolio uptime monitoring and changelog automated."
+  },
+  {
     "date": "2026-09-19",
     "summary": "job-market-pulse market report generated; portfolio uptime monitoring and changelog updated."
   },
@@ -114,9 +118,5 @@
   {
     "date": "2026-08-22",
     "summary": "Market report automated for 2026-08-21; portfolio changelog updated."
-  },
-  {
-    "date": "2026-08-21",
-    "summary": "Migrated DuckDB storage to Cloudflare R2 across pipelines, fixed weather dependency, optimized streamlit keepalive pings."
   }
 ]
