@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-09-21",
+    "summary": "Fixed solver timeout and queue bottlenecks in route optimization; terminated hung workers and capped concurrent solves."
+  },
+  {
     "date": "2026-09-20",
     "summary": "Job market report generated for 2026-09-19; portfolio uptime monitoring and changelog automated."
   },
@@ -114,9 +118,5 @@
   {
     "date": "2026-08-23",
     "summary": "Market report generated for 2026-08-22; portfolio changelog updated."
-  },
-  {
-    "date": "2026-08-22",
-    "summary": "Market report automated for 2026-08-21; portfolio changelog updated."
   }
 ]
