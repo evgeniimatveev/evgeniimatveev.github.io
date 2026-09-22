@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-09-22",
+    "summary": "Market report generated for job-market-pulse; portfolio uptime monitoring and AI changelog updated."
+  },
+  {
     "date": "2026-09-21",
     "summary": "Fixed solver timeout and queue bottlenecks in route optimization; terminated hung workers and capped concurrent solves."
   },
@@ -114,9 +118,5 @@
   {
     "date": "2026-08-24",
     "summary": "Updated layoffs tracker with latest data and published weekly market report."
-  },
-  {
-    "date": "2026-08-23",
-    "summary": "Market report generated for 2026-08-22; portfolio changelog updated."
   }
 ]
