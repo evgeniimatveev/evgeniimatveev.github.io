@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-10-01",
+    "summary": "Market report for 2026-09-30 published; uptime snapshots and changelog updated."
+  },
+  {
     "date": "2026-09-30",
     "summary": "Job market pulse report generated for September 29, 2026; portfolio uptime monitoring and changelog automated."
   },
@@ -114,9 +118,5 @@
   {
     "date": "2026-09-02",
     "summary": "Generated live market report for September 2026; redesigned portfolio with interactive architecture diagram, refined color palette, and terminal output display."
-  },
-  {
-    "date": "2026-09-01",
-    "summary": "Market report generated for August 31, 2026; portfolio uptime monitoring and changelog automated."
   }
 ]
