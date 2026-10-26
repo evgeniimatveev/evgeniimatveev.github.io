@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-10-26",
+    "summary": "Layoffs tracker refreshed with latest weekly data; uptime monitoring updated."
+  },
+  {
     "date": "2026-10-25",
     "summary": "Market report generated for Oct 24, 2026; uptime monitoring and AI changelog updated."
   },
@@ -114,9 +118,5 @@
   {
     "date": "2026-09-27",
     "summary": "Job Market Pulse generated 2026-09-26 market report; portfolio site uptime snapshots and AI changelog updated."
-  },
-  {
-    "date": "2026-09-26",
-    "summary": "Generated market report for job-market-pulse; updated portfolio uptime monitoring and AI changelog."
   }
 ]
