@@ -1,0 +1,11 @@
+# local secrets and tool folders (the Cloudflare workers have their own .gitignore)
+.env
+.env.*
+.dev.vars
+.wrangler/
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
