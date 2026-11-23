@@ -17,7 +17,7 @@ const MONITOR_APP_MAP = {
   "ljtn7jxeawyetzefthttnc.streamlit.app": "interview-coach",
   "evgeniimatveevusa-job-market-pulse.hf.space": "job-market-pulse",
   "evgeniimatveevusa-olist-analytics.hf.space": "olist-e-commerce-analytics",
-  "evgeniimatveevusa-uber-driver-analytics.hf.space": "uber-driver-analytics",
+  "uber-driver-analytics.streamlit.app": "uber-driver-analytics",
 };
 
 function slugFor(monitor) {

@@ -1,16 +1,15 @@
 # I Drove Uber for 3 Years. Then I Analyzed It.
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.57-FF4B4B?logo=streamlit&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Plotly](https://img.shields.io/badge/Plotly-6.7-3F4F75?logo=plotly&logoColor=white)
-[![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-Spaces-FFD21E?logo=huggingface&logoColor=black)](https://evgeniimatveevusa-uber-driver-analytics.hf.space)
-![Keepalive](https://github.com/evgeniimatveev/uber-driver-analytics/actions/workflows/keepalive.yml/badge.svg)
+[![Streamlit Cloud](https://img.shields.io/badge/Live_Demo-Streamlit_Cloud-FF4B4B?logo=streamlit&logoColor=white)](https://uber-driver-analytics.streamlit.app)
 
 **3,448 trips. $70,768 earned. $31,323 taken by Uber. One question: where was the real money?**
 
-**[Live Demo → HuggingFace Spaces](https://evgeniimatveevusa-uber-driver-analytics.hf.space)**
+**[Live Demo → Streamlit Cloud](https://uber-driver-analytics.streamlit.app)**
 
 ---
 
@@ -90,22 +89,22 @@ At some point I realized: I was sitting on 3 years of personal business data and
 ```
 Uber CSV export (3 files · personal data)
         ↓  Python ingestion
-   Supabase (PostgreSQL cloud)
+   Neon (serverless PostgreSQL)
         ↓  SQL query layer (12 analytical scripts)
    Dashboard (4 pages · Plotly)
-        ↓  Docker
-   HuggingFace Spaces (always-on)
+        ↓  git push
+   Streamlit Community Cloud
 ```
 
 | Layer | Tool |
 |-------|------|
 | Data source | Uber driver CSV export (personal) |
-| Database | Supabase (PostgreSQL cloud) |
-| Ingestion | Python + pandas + REST API |
+| Database | Neon (serverless PostgreSQL, scales to zero) |
+| Ingestion | Python + pandas + SQLAlchemy |
 | Analytics | 12 SQL scripts — window functions, CTEs, cohort analysis |
 | Dashboard | Streamlit + Plotly |
 | Containerization | Docker + Docker Compose |
-| Deployment | HuggingFace Spaces (Docker SDK) |
+| Deployment | Streamlit Community Cloud |
 
 ---
 
@@ -128,7 +127,7 @@ Uber CSV export (3 files · personal data)
 ```bash
 git clone https://github.com/evgeniimatveev/uber-driver-analytics.git
 cd uber-driver-analytics
-cp .env.example .env        # fill in your Supabase credentials
+cp .env.example .env        # fill in your PostgreSQL credentials (or DATABASE_URL)
 docker compose up
 ```
 Open **http://localhost:8501**
@@ -153,9 +152,8 @@ Uber drivers can export their full trip history at [Uber Help → Request Your D
    - `driver_lifetime_trips.csv`
    - `driver_payments.csv`
    - `driver_lifetime_ratings_received.csv`
-2. Create a free project at [supabase.com](https://supabase.com)
-3. Run `sql/schema.sql` in Supabase SQL Editor
-4. Load data: `python ingestion/load_supabase.py`
+2. Create a free PostgreSQL database (e.g. [neon.tech](https://neon.tech)) and put its connection string in `.env` as `DATABASE_URL`
+3. Load schema + data: `python ingestion/load_data.py` (runs `sql/schema.sql`, then loads the CSVs)
 5. Launch: `python -m streamlit run dashboard/app.py`
 
 ---
@@ -169,8 +167,7 @@ uber-driver-analytics/
 │   ├── schema.sql           # PostgreSQL table definitions
 │   └── analysis/            # 12 analytical SQL scripts
 ├── ingestion/
-│   ├── load_data.py         # CSV → local PostgreSQL
-│   └── load_supabase.py     # CSV → Supabase via REST API
+│   └── load_data.py         # CSV → PostgreSQL (DATABASE_URL or DB_* vars)
 ├── dashboard/
 │   ├── app.py               # Streamlit app (4 pages)
 │   └── db.py                # SQL query layer
@@ -196,10 +193,9 @@ uber-driver-analytics/
 
 | Layer | Detail |
 |-------|--------|
-| Hosting | HuggingFace Spaces (Docker SDK) |
-| Uptime | 24/7 — HF Spaces does not sleep |
-| Database | Supabase (PostgreSQL) via HF Space secrets |
-| Keepalive | GitHub Actions every 30 min · cron-job.org backup |
+| Hosting | Streamlit Community Cloud (migrated from HuggingFace Spaces, Nov 2026) |
+| Database | Neon PostgreSQL via `DATABASE_URL` in Streamlit secrets |
+| Idle behavior | App may show a wake-up button after inactivity; Neon resumes automatically on first query |
 ---
 
 *Personal Uber driver data · Los Angeles, CA · May 2022 – May 2025 · Built by Evgenii Matveev*
