@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-23T05:09:21.743Z",
+  "generated": "2026-11-23T07:54:35.512Z",
   "apps": {
     "so-survey-analytics": {
       "status": "up",
@@ -16,9 +16,11 @@
         911,
         976,
         961,
-        1007
+        934,
+        1007,
+        1145
       ],
-      "avgMs": 1000
+      "avgMs": 1005
     },
     "crypto-onchain-dashboard": {
       "status": "up",
@@ -35,9 +37,11 @@
         1086,
         1087,
         1220,
-        953
+        964,
+        953,
+        909
       ],
-      "avgMs": 1044
+      "avgMs": 1029
     },
     "job-market-pulse": {
       "status": "up",
@@ -52,9 +56,10 @@
         240,
         221,
         23,
-        178
+        20,
+        155
       ],
-      "avgMs": 210
+      "avgMs": 192
     },
     "olist-e-commerce-analytics": {
       "status": "up",
@@ -70,26 +75,10 @@
         105,
         47,
         141,
-        135
+        137,
+        159
       ],
-      "avgMs": 110
-    },
-    "uber-driver-analytics": {
-      "status": "up",
-      "points": [
-        60,
-        29,
-        28,
-        27,
-        23,
-        52,
-        74,
-        20,
-        38,
-        16,
-        55
-      ],
-      "avgMs": 38
+      "avgMs": 114
     },
     "tech-layoffs-tracker": {
       "status": "up",
@@ -104,9 +93,10 @@
         985,
         1089,
         1222,
-        1045
+        999,
+        1142
       ],
-      "avgMs": 1027
+      "avgMs": 1033
     },
     "interview-coach": {
       "status": "up",
@@ -216,6 +206,13 @@
       ],
       "avgMs": 990
     },
+    "uber-driver-analytics": {
+      "status": "up",
+      "points": [
+        1072
+      ],
+      "avgMs": 1072
+    },
     "weather-pipeline": {
       "status": "up",
       "points": [
@@ -231,9 +228,11 @@
         983,
         1118,
         909,
-        924
+        968,
+        924,
+        1007
       ],
-      "avgMs": 1029
+      "avgMs": 1023
     }
   }
 }
