@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-11-24",
+    "summary": "Deployed drift detection pipeline with neon-data-diff; added per-PR dbt CI with Neon branch testing; pinned dbt-core 1.12."
+  },
+  {
+    "date": "2026-11-24",
     "summary": "Deployed uber-driver-analytics to Streamlit Cloud with Neon PostgreSQL; enhanced keepalive monitoring for crash detection."
   },
   {
@@ -114,9 +118,5 @@
   {
     "date": "2026-10-26",
     "summary": "Layoffs tracker refreshed with latest weekly data; uptime monitoring updated."
-  },
-  {
-    "date": "2026-10-25",
-    "summary": "Market report generated for Oct 24, 2026; uptime monitoring and AI changelog updated."
   }
 ]
